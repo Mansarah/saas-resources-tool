@@ -4,7 +4,7 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    unoptimized: true,
+  
     qualities: [100], // Add any quality values you use, like 75, 80, 100, etc.
   },
 }

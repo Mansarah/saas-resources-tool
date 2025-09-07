@@ -20,66 +20,81 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
-// import { NavMainUser } from "./nav-main-user";
-// import Cookies from "js-cookie";
 
-export function AppSidebar({ ...props }) {
-  // const nameL = Cookies.get("name");
-  // const emailL = Cookies.get("email");
 
+
+export   function AppSidebar({ ...props }) {
+  
   const initialData = {
-    user: {
-      name: `LeaveFlow`,
-      email: `s.khan@gmail.com`,
-      avatar: "/avatars/shadcn.jpg",
-    },
-    teams: [
-      {
-        name: `Jaju Flooring`,
-        logo: GalleryVerticalEnd,
-        plan: "",
-      },
-      {
-        name: "Acme Corp.",
-        logo: AudioWaveform,
-        plan: "Startup",
-      },
-      {
-        name: "Evil Corp.",
-        logo: Command,
-        plan: "Free",
-      },
-    ],
+   
     navMain: [
       {
         title: "Dashboard",
-        url: "/home",
+        url: "/admin",
+        icon: Frame,
+        isActive: false,
+      },
+      {
+        title: "E-Dashboard",
+        url: "/employee",
+        icon: Frame,
+        isActive: false,
+      },
+      {
+        title: "Calender",
+        url: "/admin/calender",
+        icon: Frame,
+        isActive: false,
+      },
+      {
+        title: "E-Calender",
+        url: "/employee/calender",
+        icon: Frame,
+        isActive: false,
+      },
+      {
+        title: "E-Requests",
+        url: "/employee/new-request",
         icon: Frame,
         isActive: false,
       },
      
      
       {
-        title: "Day Book",
-        url: "/day-book",
+        title: "E-Requests List",
+        url: "/employee/my-requests",
+        icon: Frame,
+        isActive: false,
+      },
+     
+     
+      {
+        title: "Time Off Requests",
+        url: "/admin/time-off-requests",
         icon: ShoppingBag,
         isActive: false,
       },
       {
-        title: "Ledger",
-        url: "/ledger",
+        title: "Company Settings",
+        url: "/admin/company-settings",
         icon: Package,
         isActive: false,
       },
       {
-        title: "Trial Balance",
-        url: "/trial-balance",
+        title: "Team management",
+        url: "/admin/employees",
         icon: Package,
         isActive: false,
       },
       {
-        title: "Change Ledger Name",
-        url: "/change-ledger-name",
+        title: "Report",
+        url: "/admin/report",
+        icon: Package,
+        isActive: false,
+      },
+      {
+        title: "Integration",
+        url: "/admin/integration",
         icon: Package,
         isActive: false,
       },
@@ -179,7 +194,7 @@ export function AppSidebar({ ...props }) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={initialData.teams} />
+        <TeamSwitcher  />
       </SidebarHeader>
       <SidebarContent className="sidebar-content">
         {/* <NavProjects projects={data.projects} /> */}
@@ -187,7 +202,7 @@ export function AppSidebar({ ...props }) {
         {/* <NavMainUser projects={initialData.userManagement} /> */}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={initialData.user} />
+        <NavUser />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
