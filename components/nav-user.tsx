@@ -20,27 +20,30 @@ import {
 } from "@/components/ui/sidebar";
 // import ChangePassword from "@/app/auth/ChangePassword";
 import { useState } from "react";
+import { useAuthSession } from "@/hooks/useAuthSession";
+import { useRouter } from "next/navigation";
+import { SignOutDialog } from "./auth/sigin-out-button";
 
 
-export function NavUser({ user }) {
+export function NavUser() {
   const [open, setOpen] = useState(false);
-
+ const [showSignOutDialog, setShowSignOutDialog] = useState(false);
   const { isMobile } = useSidebar();
-  // const navigate = useNavigate();
-  // const user_position = Cookies.get("email");
-  // const handleLogout = () => {
-  //   ['token', 'id', 'name', 'userType', 'email'].forEach(cookie => {
-  //     Cookies.remove(cookie);
-  //   });
-  //   navigate("/");
-  // };
+  const { session, loading, isAuthenticated } = useAuthSession()
+    const router = useRouter()
+  
+    if (!loading && !isAuthenticated) {
+      router.push("/auth/signin")
+      return null
+    }
 
-  // const splitUser = user.name;
-  // const intialsChar = splitUser
-  //   .split(" ")
-  //   .map((word) => word.charAt(0))
-  //   .join("")
-  //   .toUpperCase();
+
+  const splitUser = session?.user.name;
+  const intialsChar = splitUser
+    ?.split(" ")
+    .map((word) => word.charAt(0))
+    .join("")
+    .toUpperCase();
 
   return (
     <>
@@ -53,16 +56,16 @@ export function NavUser({ user }) {
                 className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               >
                 <Avatar className="h-8 w-8 rounded-lg">
-                  {/* <AvatarImage src={user.avatar} alt={user.name} /> */}
+                  {/* <AvatarImage src={user.avatar} alt={user.name} />sss */}
                   <AvatarImage src="" alt={"avatar image"} />
                   <AvatarFallback className="rounded-lg bg-blue-500 text-black">
-                    {/* {intialsChar} */}
-                    L
+                    {intialsChar}
+                   
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Sajid</span>
-                  <span className="truncate text-xs">ADMIN</span>
+                  <span className="truncate font-semibold">{session?.user.name}</span>
+                  <span className="truncate text-xs">{session?.user.role}</span>
                 </div>
                 <ChevronsUpDown className="ml-auto size-4" />
               </SidebarMenuButton>
@@ -78,32 +81,35 @@ export function NavUser({ user }) {
                   <Avatar className="h-8 w-8 rounded-lg">
                     <AvatarImage src="" alt="user.avatar" />
                     <AvatarFallback className="rounded-lg bg-blue-500 text-black">
-                      {/* {intialsChar} */}
-                      L
+                      {intialsChar}
                     </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">Sajid</span>
-                    <span className="truncate text-xs">Admin</span>
+                    <span className="truncate font-semibold">{session?.user.name}</span>
+                    <span className="truncate text-xs">{session?.user.email}</span>
                   </div>
                 </div>
               </DropdownMenuLabel>
 
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setOpen(true)}>
+              {/* <DropdownMenuItem onClick={() => setOpen(true)}>
                 <Key />
 
                 <span className=" cursor-pointer">Change Password</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem >
+              </DropdownMenuItem> */}
+         <DropdownMenuItem onClick={() => setShowSignOutDialog(true)}>
                 <LogOut />
-
-                <span className=" cursor-pointer">Log out</span>
+                <span className="cursor-pointer">Log out</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </SidebarMenuItem>
       </SidebarMenu>
+       
+      <SignOutDialog 
+        open={showSignOutDialog} 
+        onOpenChange={setShowSignOutDialog} 
+      />
       {/* <ChangePassword setOpen={setOpen} open={open} /> */}
     </>
   );
