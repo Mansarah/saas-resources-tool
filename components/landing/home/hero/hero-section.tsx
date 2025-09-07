@@ -112,7 +112,7 @@ function HeroSection() {
                           alt='Image'
                           width={44}
                           height={44}
-                          // quality={100}
+                          quality={100}
                           className='rounded-full border-2 border-white'
                           unoptimized={true}
                         />
