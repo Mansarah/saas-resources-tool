@@ -16,12 +16,14 @@ import { useEffect } from "react";
 import Loader from "@/components/loader/loader";
 import { useAuthSession } from "@/hooks/useAuthSession";
 
+
 const Page = () => {
   // const { data: session, status } = useSession();
 
   
    const { session, loading, isAuthenticated } = useAuthSession()
-   console.log("client side",session)
+
+ 
     const router = useRouter()
   
    

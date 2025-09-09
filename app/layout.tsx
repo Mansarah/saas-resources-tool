@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from 'next-themes'
 import { Providers } from '@/lib/providers'
+import AuthRedirect from '@/components/auth/AuthRedirect'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -33,6 +34,7 @@ export default function RootLayout({
             attribute='class'
             enableSystem={false}
             defaultTheme='light'>
+          <AuthRedirect/>
         {children}
         </ThemeProvider>
       </body>

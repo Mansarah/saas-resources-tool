@@ -73,6 +73,7 @@ export const authOptions: NextAuthOptions = {
         session.user.onboardingCompleted = token.onboardingCompleted as boolean;
         session.user.firstName = token.firstName as string | null;
         session.user.lastName = token.lastName as string | null;
+        
       }
       return session;
     },

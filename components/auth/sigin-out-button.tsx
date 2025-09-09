@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { signOut } from "next-auth/react";
+import { clearAuthCookies } from "@/lib/cookieUtils";
 
 interface SignOutDialogProps {
   open: boolean;
@@ -19,6 +20,7 @@ interface SignOutDialogProps {
 export function SignOutDialog({ open, onOpenChange }: SignOutDialogProps) {
   const handleSignOut = () => {
     signOut({ callbackUrl: '/' });
+    clearAuthCookies()
   };
 
   return (
