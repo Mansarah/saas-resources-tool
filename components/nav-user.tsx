@@ -63,9 +63,16 @@ export function NavUser() {
                    
                   </AvatarFallback>
                 </Avatar>
+                
                 <div className="grid flex-1 text-left text-sm leading-tight">
+                   {loading ? (
+              <span className="h-8 w-32 rounded bg-gray-600 animate-pulse" />
+            ) : (
+              <>
                   <span className="truncate font-semibold">{session?.user.name}</span>
                   <span className="truncate text-xs">{session?.user.role}</span>
+                  </>
+                     )}
                 </div>
                 <ChevronsUpDown className="ml-auto size-4" />
               </SidebarMenuButton>

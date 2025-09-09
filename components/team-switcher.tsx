@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation"
 export function TeamSwitcher() {
   const { isMobile } = useSidebar()
   const { session, loading, isAuthenticated } = useAuthSession()
+  
   const router = useRouter()
 
   if (!loading && !isAuthenticated) {

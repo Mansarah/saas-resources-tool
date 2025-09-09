@@ -1,6 +1,6 @@
 "use client"
 import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,9 +13,18 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useEffect } from "react";
+import Loader from "@/components/loader/loader";
+import { useAuthSession } from "@/hooks/useAuthSession";
 
 const Page = () => {
-  const { data: session, status } = useSession();
+  // const { data: session, status } = useSession();
+
+  
+   const { session, loading, isAuthenticated } = useAuthSession()
+   console.log("client side",session)
+    const router = useRouter()
+  
+   
   
   const { data, isLoading, isError } = useQuery({
     queryKey: ["dashboardData"],
@@ -23,36 +32,40 @@ const Page = () => {
       const response = await axios.get("/api/admin/dashboard");
       return response.data;
     },
-    enabled: !!session?.user?.id, // Only fetch if user is authenticated
+    enabled: !!session?.user?.id, 
   });
-
-  // Handle redirect based on session status
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      redirect("/auth/signin");
+ if (!loading && !isAuthenticated) {
+      router.push("/auth/signin")
+      return null
     }
-  }, [status]);
+  
+  // Handle redirect based on session status
+  // useEffect(() => {
+  //   if (status === "unauthenticated") {
+  //     redirect("/auth/signin");
+  //   }
+  // }, [status]);
 
-  if (status === "loading") {
-    return <div>Loading session...</div>;
+  if ( isLoading || !data) {
+    return <Loader/>
   }
 
-  if (!session?.user?.id) {
-    return <div>Unauthorized</div>;
-  }
+  // if (!session?.user?.id) {
+  //   return <div>Unauthorized</div>;
+  // }
 
-  if (isLoading) {
-    return <div>Loading dashboard data...</div>;
-  }
+  // if (isLoading) {
+  //   return <div>Loading dashboard data...</div>;
+  // }
 
-  if (isError || !data) {
+  if (isError  ) {
     return <div>Failed to load dashboard data</div>;
   }
 
   return (
-    <div className="space-y-8 mt-12">
-      <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold">{data.companyName} Dashboard</h1>
+    <div className="">
+      <div className="flex flex-col  mb-2">
+        <p className="text-3xl  font-bold">{data.companyName} Dashboard</p>
         <p className="text-gray-500">Manage your company and employees</p>
       </div>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -67,7 +80,7 @@ const Page = () => {
           );
         })}
       </div>
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid mt-2  gap-6 md:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle>Time Off Requests</CardTitle>
