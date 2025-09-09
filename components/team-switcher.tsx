@@ -12,10 +12,11 @@ import {
 } from "@/components/ui/sidebar"
 import {  useClientCookies } from "@/hooks/use-client-cookie"
 
+
 export function TeamSwitcher() {
   const { isMobile } = useSidebar()
     const { values, isClient } = useClientCookies(['user_companyName'])
-
+ 
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -34,6 +35,7 @@ export function TeamSwitcher() {
             ) : (
               <span className="h-4 w-32 rounded bg-gray-300 animate-pulse" />
             )}
+          
             <span className="truncate text-xs">LeaveFlow CRM</span>
           </div>
           <ChevronsUpDown className="ml-auto" />

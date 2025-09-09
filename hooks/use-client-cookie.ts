@@ -21,7 +21,7 @@ export const useClientCookies = (cookieNames: string[]) => {
     })
     
     setValues(newValues)
-  }, [cookieNames.join(',')]) // Using join to create a stable dependency
+  }, [cookieNames.join(',')]) 
 
   return { values, isClient }
 }

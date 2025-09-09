@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { signOut } from "next-auth/react";
-import { clearAuthCookies } from "@/lib/cookieUtils";
+import { clearAuthCookies } from "@/lib/clear-cookies";
+
 
 interface SignOutDialogProps {
   open: boolean;

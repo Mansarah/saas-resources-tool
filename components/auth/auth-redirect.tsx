@@ -26,7 +26,7 @@ const AuthRedirect = () => {
           clearAuthCookies();
         } else {
          
-          const response = await fetch('/api/auth/session');
+          const response = await fetch('/api/auth/session-cookies');
           if (response.ok) {
             const sessionData = await response.json();
             setSessionCookies(sessionData);

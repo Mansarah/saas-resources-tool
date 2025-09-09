@@ -37,30 +37,13 @@ const { values, isClient } = useClientCookies(['user_id'])
     },
     enabled: !!values?.user_id, 
   });
-//  if (!isLoading && !isClient) {
-//       router.push("/auth/signin")
-//       return null
-//     }
-  
-  // Handle redirect based on session status
-  // useEffect(() => {
-  //   if (status === "unauthenticated") {
-  //     redirect("/auth/signin");
-  //   }
-  // }, [status]);
+
 
   if ( isLoading || !data || !isClient) {
     return <Loader/>
   }
 
-  // if (!session?.user?.id) {
-  //   return <div>Unauthorized</div>;
-  // }
-
-  // if (isLoading) {
-  //   return <div>Loading dashboard data...</div>;
-  // }
-
+ 
   if (isError  ) {
     return <div>Failed to load dashboard data</div>;
   }
