@@ -1,6 +1,5 @@
-"use client"
-import { useSession } from "next-auth/react";
-import { redirect, useRouter } from "next/navigation";
+
+import {  redirect } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,52 +9,101 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
-import { useEffect } from "react";
-import Loader from "@/components/loader/loader";
-import { useClientCookies } from "@/hooks/use-client-cookie";
+
+import prisma from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 
 
-const Page = () => {
-  // const { data: session, status } = useSession();
+const Page = async () => {
+  const session = await getServerSession(authOptions);
 
-  
- 
-const { values, isClient } = useClientCookies(['user_id'])
- 
-    const router = useRouter()
-  
-   
-  
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["dashboardData"],
-    queryFn: async () => {
-      const response = await axios.get("/api/admin/dashboard");
-      return response.data;
+  if (!session?.user?.id) {
+    redirect("/");
+  }
+
+  const adminUser = await prisma.user.findUnique({
+    where: {
+      id: session.user.id,
     },
-    enabled: !!values?.user_id, 
+    select: {
+      companyId: true,
+      company: {
+        select: {
+          name: true,
+        },
+      },
+    },
   });
 
-
-  if ( isLoading || !data || !isClient) {
-    return <Loader/>
+  if (!adminUser) {
+    redirect("/onboarding");
   }
 
- 
-  if (isError  ) {
-    return <div>Failed to load dashboard data</div>;
-  }
+  const companyId = adminUser.companyId;
+  const companyName = adminUser.company?.name;
 
+  const pendingRequestsCount = await prisma.timeOffRequest.count({
+    where: {
+      employee: {
+        companyId: companyId,
+      },
+      status: "PENDING",
+    },
+  });
+
+  const approvedRequestsCount = await prisma.timeOffRequest.count({
+    where: {
+      employee: {
+        companyId: companyId,
+      },
+      status: "APPROVED",
+    },
+  });
+    // in: ["EMPLOYEE", "ADMIN"],
+  const employeeCount = await prisma.user.count({
+    where: {
+      companyId,
+      role: {
+        in: ["EMPLOYEE", "ADMIN"],  
+      },
+    },
+  });
+
+  const activeInvitationCodesCount = await prisma.code.count({
+    where: {
+      used: false,
+      companyId,
+    },
+  });
+
+  const data = [
+    {
+      title: "Pending Requests",
+      data: pendingRequestsCount,
+    },
+    {
+      title: "Approved Requests",
+      data: approvedRequestsCount,
+    },
+    {
+      title: "Employee Count",
+      data: employeeCount,
+    },
+    {
+      title: "Active Invitation Codes",
+      data: activeInvitationCodesCount,
+    },
+  ];
   return (
     <div className="">
       <div className="flex flex-col  mb-2">
-        <p className="text-3xl  font-bold">{data.companyName} Dashboard</p>
+        <p className="text-3xl  font-bold">{companyName} Dashboard</p>
         <p className="text-gray-500">Manage your company and employees</p>
       </div>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {data.dashboardData?.map((item: { title: string; data: number }) => {
+        {data?.map((item: { title: string; data: number }) => {
           return (
             <Card key={item.title}>
               <CardContent className="p-6">
@@ -117,8 +165,8 @@ const { values, isClient } = useClientCookies(['user_id'])
                 <Link href="/admin/invitation-codes">Invitation Codes</Link>
               </Button>
               <p className="text-sm text-gray-500 mt-2">
-                You have {data.activeInvitationCodesCount} active invitation code
-                {data.activeInvitationCodesCount !== 1 ? "s" : ""}.
+                You have {activeInvitationCodesCount} active invitation code
+                {activeInvitationCodesCount !== 1 ? "s" : ""}.
               </p>
             </div>
           </CardContent>
