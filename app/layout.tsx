@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from 'next-themes'
 import { Providers } from '@/lib/providers'
-import AuthRedirect from '@/components/auth/AuthRedirect'
+import AuthRedirect from '@/components/auth/auth-redirect'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',

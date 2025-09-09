@@ -11,20 +11,26 @@ const AuthRedirect = () => {
   useEffect(() => {
     const fetchAndSetSessionCookies = async () => {
       try {
+    
+        const existingUserId = Cookies.get('user_id');
+      
+        
+        if (existingUserId) {
+       
+          return;
+        }
       
         if (session) {
           setSessionCookies(session);
         } else if (status === 'unauthenticated') {
-        
           clearAuthCookies();
         } else {
-       
+         
           const response = await fetch('/api/auth/session');
           if (response.ok) {
             const sessionData = await response.json();
             setSessionCookies(sessionData);
           } else {
-           
             clearAuthCookies();
           }
         }
@@ -44,8 +50,6 @@ const AuthRedirect = () => {
       secure: process.env.NODE_ENV === 'production',
     };
 
-    
-    
     if (sessionData.user) {
       Cookies.set('user_id', sessionData.user.id, cookieOptions);
       Cookies.set('user_name', sessionData.user.name, cookieOptions);
@@ -73,7 +77,6 @@ const AuthRedirect = () => {
     });
   };
 
-  
   return null;
 };
 

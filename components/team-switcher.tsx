@@ -10,11 +10,11 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { useClientCookie } from "@/hooks/useClientCookie"
+import {  useClientCookies } from "@/hooks/use-client-cookie"
 
 export function TeamSwitcher() {
   const { isMobile } = useSidebar()
-  const { value: userCompany, isClient } = useClientCookie('user_companyName')
+    const { values, isClient } = useClientCookies(['user_companyName'])
 
   return (
     <SidebarMenu>
@@ -29,7 +29,7 @@ export function TeamSwitcher() {
           <div className="grid flex-1 text-left text-sm leading-tight">
             {isClient ? (
               <span className="truncate font-semibold">
-                {userCompany || "Company"}
+                {values?.user_companyName || "Company"}
               </span>
             ) : (
               <span className="h-4 w-32 rounded bg-gray-300 animate-pulse" />

@@ -14,15 +14,16 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useEffect } from "react";
 import Loader from "@/components/loader/loader";
-import { useAuthSession } from "@/hooks/useAuthSession";
+import { useClientCookies } from "@/hooks/use-client-cookie";
+
 
 
 const Page = () => {
   // const { data: session, status } = useSession();
 
   
-   const { session, loading, isAuthenticated } = useAuthSession()
-
+ 
+const { values, isClient } = useClientCookies(['user_id'])
  
     const router = useRouter()
   
@@ -34,12 +35,12 @@ const Page = () => {
       const response = await axios.get("/api/admin/dashboard");
       return response.data;
     },
-    enabled: !!session?.user?.id, 
+    enabled: !!values?.user_id, 
   });
- if (!loading && !isAuthenticated) {
-      router.push("/auth/signin")
-      return null
-    }
+//  if (!isLoading && !isClient) {
+//       router.push("/auth/signin")
+//       return null
+//     }
   
   // Handle redirect based on session status
   // useEffect(() => {
@@ -48,7 +49,7 @@ const Page = () => {
   //   }
   // }, [status]);
 
-  if ( isLoading || !data) {
+  if ( isLoading || !data || !isClient) {
     return <Loader/>
   }
 

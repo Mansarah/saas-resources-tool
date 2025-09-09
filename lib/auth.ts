@@ -165,5 +165,9 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: "/auth/signin",
+     
+       signOut: "/",
+    error: "/auth/signin", 
+    verifyRequest: "/auth/signin",
   },
 };

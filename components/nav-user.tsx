@@ -20,25 +20,23 @@ import {
 } from "@/components/ui/sidebar";
 // import ChangePassword from "@/app/auth/ChangePassword";
 import { useState } from "react";
-import { useAuthSession } from "@/hooks/useAuthSession";
-import { useRouter } from "next/navigation";
+
+
 import { SignOutDialog } from "./auth/sigin-out-button";
+import { useClientCookies } from "@/hooks/use-client-cookie";
 
 
 export function NavUser() {
   const [open, setOpen] = useState(false);
  const [showSignOutDialog, setShowSignOutDialog] = useState(false);
   const { isMobile } = useSidebar();
-  const { session, loading, isAuthenticated } = useAuthSession()
-    const router = useRouter()
+ 
+      const { values, isClient } = useClientCookies(['user_name','user_role'])
+ 
   
-    if (!loading && !isAuthenticated) {
-      router.push("/auth/signin")
-      return null
-    }
+  
 
-
-  const splitUser = session?.user.name;
+  const splitUser = values?.user_name;
   const intialsChar = splitUser
     ?.split(" ")
     .map((word) => word.charAt(0))
@@ -65,12 +63,12 @@ export function NavUser() {
                 </Avatar>
                 
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                   {loading ? (
+                   {!isClient ? (
               <span className="h-8 w-32 rounded bg-gray-600 animate-pulse" />
             ) : (
               <>
-                  <span className="truncate font-semibold">{session?.user.name}</span>
-                  <span className="truncate text-xs">{session?.user.role}</span>
+                  <span className="truncate font-semibold">{values?.user_name}</span>
+                  <span className="truncate text-xs">{values?.user_role}</span>
                   </>
                      )}
                 </div>
@@ -92,8 +90,8 @@ export function NavUser() {
                     </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">{session?.user.name}</span>
-                    <span className="truncate text-xs">{session?.user.email}</span>
+                    <span className="truncate font-semibold">{values?.user_name}</span>
+                    <span className="truncate text-xs">{values?.user_role}</span>
                   </div>
                 </div>
               </DropdownMenuLabel>
