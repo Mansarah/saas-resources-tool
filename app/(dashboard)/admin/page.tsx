@@ -1,6 +1,5 @@
-"use client"
-import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
+
+import {  redirect } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,53 +9,101 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
-import { useEffect } from "react";
 
-const Page = () => {
-  const { data: session, status } = useSession();
-  
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["dashboardData"],
-    queryFn: async () => {
-      const response = await axios.get("/api/admin/dashboard");
-      return response.data;
-    },
-    enabled: !!session?.user?.id, // Only fetch if user is authenticated
-  });
+import prisma from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
-  // Handle redirect based on session status
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      redirect("/auth/signin");
-    }
-  }, [status]);
 
-  if (status === "loading") {
-    return <div>Loading session...</div>;
-  }
+
+const Page = async () => {
+  const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
-    return <div>Unauthorized</div>;
+    redirect("/");
   }
 
-  if (isLoading) {
-    return <div>Loading dashboard data...</div>;
+  const adminUser = await prisma.user.findUnique({
+    where: {
+      id: session.user.id,
+    },
+    select: {
+      companyId: true,
+      company: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
+
+  if (!adminUser) {
+    redirect("/onboarding");
   }
 
-  if (isError || !data) {
-    return <div>Failed to load dashboard data</div>;
-  }
+  const companyId = adminUser.companyId;
+  const companyName = adminUser.company?.name;
 
+  const pendingRequestsCount = await prisma.timeOffRequest.count({
+    where: {
+      employee: {
+        companyId: companyId,
+      },
+      status: "PENDING",
+    },
+  });
+
+  const approvedRequestsCount = await prisma.timeOffRequest.count({
+    where: {
+      employee: {
+        companyId: companyId,
+      },
+      status: "APPROVED",
+    },
+  });
+    // in: ["EMPLOYEE", "ADMIN"],
+  const employeeCount = await prisma.user.count({
+    where: {
+      companyId,
+      role: {
+        in: ["EMPLOYEE", "ADMIN"],  
+      },
+    },
+  });
+
+  const activeInvitationCodesCount = await prisma.code.count({
+    where: {
+      used: false,
+      companyId,
+    },
+  });
+
+  const data = [
+    {
+      title: "Pending Requests",
+      data: pendingRequestsCount,
+    },
+    {
+      title: "Approved Requests",
+      data: approvedRequestsCount,
+    },
+    {
+      title: "Employee Count",
+      data: employeeCount,
+    },
+    {
+      title: "Active Invitation Codes",
+      data: activeInvitationCodesCount,
+    },
+  ];
   return (
-    <div className="space-y-8 mt-12">
-      <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold">{data.companyName} Dashboard</h1>
+    <div className="">
+      <div className="flex flex-col  mb-2">
+        <p className="text-3xl  font-bold">{companyName} Dashboard</p>
         <p className="text-gray-500">Manage your company and employees</p>
       </div>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {data.dashboardData?.map((item: { title: string; data: number }) => {
+        {data?.map((item: { title: string; data: number }) => {
           return (
             <Card key={item.title}>
               <CardContent className="p-6">
@@ -67,7 +114,7 @@ const Page = () => {
           );
         })}
       </div>
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid mt-2  gap-6 md:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle>Time Off Requests</CardTitle>
@@ -118,8 +165,8 @@ const Page = () => {
                 <Link href="/admin/invitation-codes">Invitation Codes</Link>
               </Button>
               <p className="text-sm text-gray-500 mt-2">
-                You have {data.activeInvitationCodesCount} active invitation code
-                {data.activeInvitationCodesCount !== 1 ? "s" : ""}.
+                You have {activeInvitationCodesCount} active invitation code
+                {activeInvitationCodesCount !== 1 ? "s" : ""}.
               </p>
             </div>
           </CardContent>

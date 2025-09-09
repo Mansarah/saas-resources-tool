@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 export default async function Home() {
  const session = await getServerSession(authOptions);
   
-  console.log("role",session)
+  console.log("server session",session)
    if (session) {
     if (!session.user.onboardingCompleted) {
       redirect("/onboarding");

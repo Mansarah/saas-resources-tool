@@ -1,5 +1,9 @@
+// components/team-switcher.tsx
+'use client';
+
 import * as React from "react"
 import { ChevronsUpDown, GalleryVerticalEnd } from "lucide-react"
+import { useSession } from "next-auth/react"
 
 import {
   SidebarMenu,
@@ -7,18 +11,10 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { useAuthSession } from "@/hooks/useAuthSession"
-import { useRouter } from "next/navigation"
 
 export function TeamSwitcher() {
   const { isMobile } = useSidebar()
-  const { session, loading, isAuthenticated } = useAuthSession()
-  const router = useRouter()
-
-  if (!loading && !isAuthenticated) {
-    router.push("/auth/signin")
-    return null
-  }
+  const { data: session, status } = useSession()
 
   return (
     <SidebarMenu>
@@ -31,13 +27,14 @@ export function TeamSwitcher() {
             <GalleryVerticalEnd className="size-4" />
           </div>
           <div className="grid flex-1 text-left text-sm leading-tight">
-            {loading ? (
-              <span className="h-4 w-32 rounded bg-gray-600 animate-pulse" />
+            {status === "loading" ? (
+              <span className="h-4 w-32 rounded bg-gray-300 animate-pulse" />
             ) : (
               <span className="truncate font-semibold">
-                {session?.user.companyName}
+                {session?.user?.companyName || "Company"}
               </span>
             )}
+          
             <span className="truncate text-xs">LeaveFlow CRM</span>
           </div>
           <ChevronsUpDown className="ml-auto" />

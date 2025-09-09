@@ -23,6 +23,7 @@ import {  Key, LogOut } from "lucide-react";
 import { useState } from "react";
 import { Breadcrumbs } from "@/components/new/breadcrumbs";
 import { useRouter } from "next/navigation";
+import ThemeToggler from "@/components/layout/header/ThemeToggle";
 
 
 
@@ -48,7 +49,8 @@ export default function Page({ children }: { children?: React.ReactNode }) {
 
       <SidebarInset>
         {/* Header that appears on all screens */}
-        <header className="hidden sm:flex flex-row justify-between h-16 shrink-0   items-center gap-2 transition-[width,height] ease-linear">
+        {/* <header className="hidden sm:flex flex-row justify-between h-16 shrink-0   items-center gap-2 transition-[width,height] ease-linear"> */}
+           <header className="hidden sm:sticky  top-0 z-10 sm:flex h-16 shrink-0 items-center gap-2 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="flex items-center gap-2 px-4">
 
             <SidebarTrigger className="-ml-1 hover:bg-blue-100" />
@@ -73,7 +75,9 @@ export default function Page({ children }: { children?: React.ReactNode }) {
             </Breadcrumb> */}
                <Breadcrumbs onBack={handleBackClick} />
           </div>
+             {/* <ThemeToggler/> */}
         </header>
+     
 
 
 

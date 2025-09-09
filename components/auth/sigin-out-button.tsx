@@ -11,6 +11,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { signOut } from "next-auth/react";
 
+
+
 interface SignOutDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -19,6 +21,7 @@ interface SignOutDialogProps {
 export function SignOutDialog({ open, onOpenChange }: SignOutDialogProps) {
   const handleSignOut = () => {
     signOut({ callbackUrl: '/' });
+  
   };
 
   return (

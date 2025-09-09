@@ -33,6 +33,7 @@ export default function RootLayout({
             attribute='class'
             enableSystem={false}
             defaultTheme='light'>
+         
         {children}
         </ThemeProvider>
       </body>
