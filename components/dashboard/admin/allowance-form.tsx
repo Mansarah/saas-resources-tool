@@ -33,14 +33,14 @@ export default function AllowanceForm({
   
  const queryClient = useQueryClient();
 
-  // Update employee allowance mutation
+ 
   const updateEmployeeAllowanceMutation = useMutation({
     mutationFn: async (data: { employeeId: string; availableDays: number }) => {
       const response = await axios.put("/api/admin/employees/allowance", data);
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["employees"] });
+      queryClient.invalidateQueries({ queryKey: ["employees",'team-management','allowance'] });
     },
   });
 // console.log("res employe",currentAllowance)

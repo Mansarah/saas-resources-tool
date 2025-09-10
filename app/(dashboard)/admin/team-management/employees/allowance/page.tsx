@@ -12,6 +12,9 @@ import {
 } from "@/components/ui/table";
 import prisma from "@/lib/prisma";
 import AllowanceForm from "@/components/dashboard/admin/allowance-form";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { ArrowLeftIcon } from "lucide-react";
 
 
 const page = async () => {
@@ -60,6 +63,16 @@ const page = async () => {
     <div className="">
       <div className="flex flex-col space-y-6">
         <div className="flex flex-col mb-2">
+             <Button
+            variant={"ghost"}
+            asChild
+            className="w-fit p-0 h-auto text-sm text-gray-500 hover:text-gray-700"
+          >
+            <Link href="/admin/team-management/employees">
+              <ArrowLeftIcon className="w-4 h-4 mr-2" />
+              Back to Employees
+            </Link>
+          </Button>
           <p className="text-3xl font-bold">Holiday allowance management</p>
           <p className="text-gray-500">Manage employee holiday allowances</p>
         </div>
