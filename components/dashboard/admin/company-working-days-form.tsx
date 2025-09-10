@@ -70,7 +70,9 @@ const CompanyWorkingDaysForm = ({
     },
   });
 
- 
+   useEffect(() => {
+    console.log(initialWorkingDays);
+  }, [initialWorkingDays]);
 
   const handleDayToggle = (day: string) => {
     setSelectedDays((prev) =>
