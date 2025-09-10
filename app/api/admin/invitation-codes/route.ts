@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-export async function PUT(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
@@ -16,37 +16,49 @@ export async function PUT(request: NextRequest) {
         id: session.user.id,
       },
       select: {
-        companyId: true,
         role: true,
+        companyId: true,
       },
     });
 
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-
-    if (user.role !== "ADMIN") {
+    if (!user || user.role !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    const { name, website, logo } = await request.json();
+    const generateRandomCode = () => {
+      return Math.floor(100000 + Math.random() * 900000).toString();
+    };
 
-    await prisma.company.update({
+    let code = generateRandomCode();
+
+    let existingCode = await prisma.code.findFirst({
       where: {
-        id: user.companyId!,
-      },
-      data: {
-        name,
-        website,
-        logo,
+        code,
       },
     });
 
-    return NextResponse.json({ success: true });
+    while (existingCode) {
+      code = generateRandomCode();
+      existingCode = await prisma.code.findFirst({
+        where: {
+          code,
+        },
+      });
+    }
+
+    const newCode = await prisma.code.create({
+      data: {
+        code,
+        companyId: user.companyId!,
+        used: false,
+      },
+    });
+
+    return NextResponse.json(newCode);
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Failed to update company profile" },
+      { error: "Failed to generate invitation code" },
       { status: 500 }
     );
   }

@@ -16,8 +16,8 @@ export async function PUT(request: NextRequest) {
         id: session.user.id,
       },
       select: {
-        companyId: true,
         role: true,
+        companyId: true,
       },
     });
 
@@ -29,16 +29,14 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    const { name, website, logo } = await request.json();
+    const { workingDays } = await request.json();
 
     await prisma.company.update({
       where: {
         id: user.companyId!,
       },
       data: {
-        name,
-        website,
-        logo,
+        workingDays: JSON.stringify(workingDays),
       },
     });
 
@@ -46,7 +44,7 @@ export async function PUT(request: NextRequest) {
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Failed to update company profile" },
+      { error: "Failed to update company working days" },
       { status: 500 }
     );
   }

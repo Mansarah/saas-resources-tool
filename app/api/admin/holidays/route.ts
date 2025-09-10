@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-export async function PUT(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
@@ -29,24 +29,22 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    const { name, website, logo } = await request.json();
+    const { name, date, isRecurring } = await request.json();
 
-    await prisma.company.update({
-      where: {
-        id: user.companyId!,
-      },
+    const holiday = await prisma.companyHoliday.create({
       data: {
         name,
-        website,
-        logo,
+        date: new Date(date),
+        isRecurring,
+        companyId: user.companyId!,
       },
     });
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json(holiday);
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Failed to update company profile" },
+      { error: "Failed to add company holiday" },
       { status: 500 }
     );
   }

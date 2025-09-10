@@ -11,34 +11,24 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
+    const adminUser = await prisma.user.findUnique({
       where: {
         id: session.user.id,
       },
-      select: {
-        companyId: true,
-        role: true,
-      },
     });
 
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-
-    if (user.role !== "ADMIN") {
+    if (!adminUser || adminUser.role !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    const { name, website, logo } = await request.json();
+    const { employeeId, availableDays } = await request.json();
 
-    await prisma.company.update({
+    await prisma.user.update({
       where: {
-        id: user.companyId!,
+        id: employeeId,
       },
       data: {
-        name,
-        website,
-        logo,
+        availableDays,
       },
     });
 
@@ -46,7 +36,7 @@ export async function PUT(request: NextRequest) {
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Failed to update company profile" },
+      { error: "Failed to update employee allowance" },
       { status: 500 }
     );
   }
