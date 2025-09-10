@@ -269,20 +269,11 @@ const CompanyHolidaysForm = ({
   };
 
   return (
-    <div className="space-y-8 mt-12">
-      <div className="flex items-center justify-between">
+    <div className="">
+      <div className="flex items-center justify-between mb-2">
         <div className="flex flex-col space-y-2">
-          <Button
-            variant={"ghost"}
-            asChild
-            className="w-fit p-0 h-auto text-sm text-gray-500 hover:text-gray-700"
-          >
-            <Link href="/admin/company-settings">
-              <ArrowLeftIcon className="w-4 h-4 mr-2" />
-              Back to settings
-            </Link>
-          </Button>
-          <h1 className="text-3xl font-bold">Company Holidays</h1>
+        
+          <p className="text-3xl font-bold">Company Holidays</p>
           <p className="text-gray-500">
             Manage your company-wide holidays and time off calendar.
           </p>
@@ -577,7 +568,7 @@ const CompanyHolidaysForm = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <Card>
+      <Card className="mt-2">
         <CardHeader>
           <CardTitle>About Company Holidays</CardTitle>
           <CardDescription>
