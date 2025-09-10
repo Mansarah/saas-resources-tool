@@ -97,12 +97,25 @@ export   function AppSidebar({ ...props }) {
          
         ],
       },
-      {
+       {
         title: "Team management",
-        url: "/admin/employees",
-        icon: Package,
+        url: "#",
+        icon: TicketPlus,
         isActive: false,
+        items: [
+          {
+            title: "Employees",
+            url: "/admin/team-management/employees",
+          },
+          {
+            title: "Invitation Codes",
+            url: "/admin/team-management/invitation-codes",
+          },
+         
+         
+        ],
       },
+     
       {
         title: "Report",
         url: "/admin/report",
