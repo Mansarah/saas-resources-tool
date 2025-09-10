@@ -7,7 +7,8 @@ import {
   GalleryVerticalEnd,
     Frame,
     ShoppingBag,
-    Package,  
+    Package,
+    TicketPlus,  
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -74,11 +75,27 @@ export   function AppSidebar({ ...props }) {
         icon: ShoppingBag,
         isActive: false,
       },
-      {
+      
+       {
         title: "Company Settings",
-        url: "/admin/company-settings",
-        icon: Package,
+        url: "#",
+        icon: TicketPlus,
         isActive: false,
+        items: [
+          {
+            title: "Profile",
+            url: "/admin/company-settings/profile",
+          },
+          {
+            title: "Holidays",
+            url: "/admin/company-settings/holidays",
+          },
+          {
+            title: "Working Days",
+            url: "/admin/company-settings/working-days",
+          },
+         
+        ],
       },
       {
         title: "Team management",
