@@ -71,12 +71,17 @@ const Page = async () => {
     },
   });
 
-  const activeInvitationCodesCount = await prisma.code.count({
+  let activeInvitationCodesCount = 0;
+
+if (companyId) {
+  activeInvitationCodesCount = await prisma.code.count({
     where: {
       used: false,
-      companyId,
+      companyId: companyId,
     },
   });
+}
+
 
   const data = [
     {
