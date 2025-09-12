@@ -23,17 +23,16 @@ import { useState } from "react";
 
 import { SignOutDialog } from "./auth/sigin-out-button";
 
-export function NavUser() {
-  const [open, setOpen] = useState(false);
+export function NavUser({
+  user,
+}: {
+  user: { name: string; role: string; image: string | null };
+}) {
   const [showSignOutDialog, setShowSignOutDialog] = useState(false);
   const { isMobile } = useSidebar();
-  const { data: session, status } = useSession();
 
-  const userName = session?.user?.name || session?.user?.firstName + " " + session?.user?.lastName;
-  const userRole = session?.user?.role;
-  
-  const splitUser = userName;
-  const intialsChar = splitUser
+  const splitUser = user.name;
+  const initialsChar = splitUser
     ?.split(" ")
     .map((word) => word.charAt(0))
     .join("")
@@ -50,21 +49,15 @@ export function NavUser() {
                 className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               >
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={session?.user?.image || ""} alt={"avatar image"} />
+                                   <AvatarImage src={user.image || ""} alt="avatar image" />
                   <AvatarFallback className="rounded-lg bg-blue-500 text-black">
-                    {intialsChar}
+                {initialsChar}
                   </AvatarFallback>
                 </Avatar>
                 
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  {status === "loading" ? (
-                    <span className="h-8 w-32 rounded bg-gray-600 animate-pulse" />
-                  ) : (
-                    <>
-                      <span className="truncate font-semibold">{userName}</span>
-                      <span className="truncate text-xs">{userRole}</span>
-                    </>
-                  )}
+                  <span className="truncate font-semibold">{user.name}</span>
+                  <span className="truncate text-xs">{user.role}</span>
                 </div>
                 <ChevronsUpDown className="ml-auto size-4" />
               </SidebarMenuButton>
@@ -78,14 +71,14 @@ export function NavUser() {
               <DropdownMenuLabel className="p-0 font-normal">
                 <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                   <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarImage src={session?.user?.image || ""} alt="user avatar" />
+                    <AvatarImage src={user.image || ""} alt="user avatar" />
                     <AvatarFallback className="rounded-lg bg-blue-500 text-black">
-                      {intialsChar}
+                      {initialsChar}
                     </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">{userName}</span>
-                    <span className="truncate text-xs">{userRole}</span>
+                    <span className="truncate font-semibold">{user.name}</span>
+                    <span className="truncate text-xs">{user.role}</span>
                   </div>
                 </div>
               </DropdownMenuLabel>

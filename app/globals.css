@@ -235,15 +235,7 @@ layer(base);
     @apply dark:bg-dark_black;
   }
 
-  body {
-  }
-
-  * {
-    margin: 0%;
-    padding: 0%;
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
-  }
+ 
 }
 
 @layer utilities {
@@ -266,40 +258,5 @@ layer(base);
       white 80%,
       transparent
     );
-  }
-}
-
-@layer components {
-  body {
-    @apply text-base font-normal;
-    -webkit-text-size-adjust: 100%;
-  }
-
-  h1 {
-    @apply 2xl:text-9xl 2xl:leading-[156px] md:text-7xl text-5xl font-medium text-dark_black dark:text-white;
-  }
-
-  h2 {
-    @apply text-4xl md:text-5xl font-medium text-dark_black dark:text-white;
-  }
-
-  h3 {
-    @apply text-5xl font-medium text-dark_black dark:text-white;
-  }
-
-  h4 {
-    @apply text-2xl font-medium text-dark_black dark:text-white;
-  }
-
-  h5 {
-    @apply text-xl font-medium;
-  }
-
-  h6 {
-    @apply text-lg lg:text-xl font-medium;
-  }
-
-  p {
-    @apply text-base  font-normal text-dark_black dark:text-white;
   }
 }
