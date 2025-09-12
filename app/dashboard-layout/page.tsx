@@ -109,7 +109,7 @@ export default function Page({
               <button className="flex items-center justify-center relative">
                 <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full"></div>
                 <Avatar className="h-8 w-8 border-2 border-blue-300 rounded-lg shadow-sm">
-                  <AvatarImage src="/avatars/shadcn.jpg" alt={"initialsChar"} />
+                  <AvatarImage src="/avatars/shadcn.jpeg" alt={"initialsChar"} />
                   <AvatarFallback className="rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 text-black font-bold text-xs">
                     L
                   </AvatarFallback>
@@ -120,7 +120,7 @@ export default function Page({
               <DropdownMenuLabel className="p-0 font-normal">
                 <div className="flex items-center gap-2 p-3 text-left text-sm bg-blue-50 rounded-t-xl">
                   <Avatar className="h-10 w-10 rounded-full border-2 border-blue-300">
-                    <AvatarImage src="/avatars/shadcn.jpg" alt="initialsChar" />
+                    <AvatarImage src="/avatars/shadcn.jpeg" alt="initialsChar" />
                     <AvatarFallback className="rounded-full bg-gradient-to-br from-blue-400 to-blue-600 text-black font-bold">
                       L
                     </AvatarFallback>

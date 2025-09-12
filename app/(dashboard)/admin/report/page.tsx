@@ -2,7 +2,7 @@
 "use client";
 import { useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useReactToPrint } from "react-to-print";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,9 +10,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader, Printer, FileSpreadsheet, Search } from "lucide-react";
-// import { useToast } from "@/hooks/use-toast";
+
 import moment from "moment";
 import axios from "axios";
+import { toast } from "sonner";
 
 interface Employee {
   id: string;
@@ -44,7 +45,7 @@ interface TimeOffRequest {
 
 const AdminReportsPage = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-//   const { toast } = useToast();
+ const tableRef = useRef<HTMLDivElement>(null);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [formValues, setFormValues] = useState({
     employeeId: "ALL",
@@ -52,7 +53,7 @@ const AdminReportsPage = () => {
     toDate: moment().format("YYYY-MM-DD"),
   });
   const [searchParams, setSearchParams] = useState<any>(null);
-  const [printLoading, setPrintLoading] = useState(false);
+const [pdfLoading, setPdfLoading] = useState(false);
   const [excelLoading, setExcelLoading] = useState(false);
 
   // Fetch employees list
@@ -64,12 +65,8 @@ const AdminReportsPage = () => {
         setEmployees(response.data.employees);
         return response.data;
       } catch (error) {
-        // toast({
-        //   title: "Error",
-        //   description: "Failed to fetch employees list",
-        //   variant: "destructive",
-        // });
-        alert("error")
+      
+       toast.error("Failed to fetch employees list")
         return { employees: [] };
       }
     },
@@ -85,11 +82,8 @@ const AdminReportsPage = () => {
         const response = await axios.post("/api/admin/reports", searchParams);
         return response.data;
       } catch (error) {
-        // toast({
-        //   title: "Error",
-        //   description: "Failed to fetch report data",
-        //   variant: "destructive",
-        // });
+       
+          toast.error("Failed to fetch report data")
          alert("error")
         return { data: [] };
       }
@@ -159,30 +153,59 @@ const AdminReportsPage = () => {
   const monthlyData = groupByMonth();
   const employeeData = groupByEmployee();
 
-  // Print functionality
-  const handlePrintPdf = useReactToPrint({
-    content: () => containerRef.current,
-    documentTitle: "Admin Leave Report",
-    pageStyle: `
-      @page {
-        size: A4 landscape;
-        margin: 10mm;
+
+
+const handleDownloadPDF = async () => {
+  const input = tableRef.current;
+  if (!input) return;
+
+  setPdfLoading(true);
+
+  // ✅ dynamically import so it only runs in client
+  const html2pdf = (await import("html2pdf.js")).default;
+
+  const options = {
+  margin: [5, 5, 5, 5],
+  filename: `leave-report-${moment().format("YYYYMMDD_HHmmss")}.pdf`,
+  image: { type: "jpeg", quality: 0.98 },
+  html2canvas: {
+    scale: 2,
+    useCORS: true,
+    scrollY: 0,   // ✅ avoids misaligned rendering
+  },
+  jsPDF: {
+    unit: "mm",
+    format: "a4",
+    orientation: "portrait",
+  },
+  pagebreak: { mode: "css" }, // ✅ cleaner control
+};
+
+
+  html2pdf()
+    .from(input)
+    .set(options)
+    .toPdf()
+    .get("pdf")
+    .then((pdf: any) => {
+      const totalPages = pdf.internal.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++) {
+        pdf.setPage(i);
+        pdf.setFontSize(10);
+        pdf.setTextColor(150);
+        pdf.text(
+          `Page ${i} of ${totalPages}`,
+          pdf.internal.pageSize.getWidth() - 20,
+          pdf.internal.pageSize.getHeight() - 10
+        );
       }
-      @media print {
-        body {
-          font-size: 10px;
-        }
-        table {
-          font-size: 11px;
-        }
-        .print-hide {
-          display: none;
-        }
-      }
-    `,
-    onBeforeGetContent: () => setPrintLoading(true),
-    onAfterPrint: () => setPrintLoading(false),
-  });
+    })
+    .save()
+    .then(() => toast.success("PDF generated successfully!"))
+    .catch(() => toast.error("Failed to generate PDF"))
+    .finally(() => setPdfLoading(false));
+};
+
 
   // Export to Excel (simplified version)
   const exportToExcel = () => {
@@ -215,18 +238,12 @@ const AdminReportsPage = () => {
       link.click();
       document.body.removeChild(link);
       
-    //   toast({
-    //     title: "Success",
-    //     description: "Report exported successfully",
-    //   });
-     alert("error")
+    
+   toast.success("Report exported successfully")
     } catch (error) {
-    //   toast({
-    //     title: "Error",
-    //     description: "Failed to export report",
-    //     variant: "destructive",
-    //   });
-     alert("error")
+   
+    toast.error("Failed to fetch report data")
+    
     } finally {
       setExcelLoading(false);
     }
@@ -237,7 +254,7 @@ const AdminReportsPage = () => {
       <h1 className="text-3xl font-bold mb-6">Admin Reports</h1>
       
       {/* Search Form */}
-      <Card className="mb-6">
+      <Card  className="mb-6">
         <CardHeader>
           <CardTitle>Generate Report</CardTitle>
         </CardHeader>
@@ -309,34 +326,35 @@ const AdminReportsPage = () => {
       {searchParams && (
         <>
           {/* Action Buttons */}
-          <div className="flex justify-end gap-2 mb-4">
-            <Button
-              variant="outline"
-              disabled={printLoading}
-              onClick={handlePrintPdf}
-            >
-              {printLoading ? (
-                <Loader className="h-4 w-4 animate-spin mr-2" />
-              ) : (
-                <Printer className="h-4 w-4 mr-2" />
-              )}
-              Print
-            </Button>
-            
-            <Button
-              variant="outline"
-              disabled={excelLoading}
-              onClick={exportToExcel}
-            >
-              {excelLoading ? (
-                <Loader className="h-4 w-4 animate-spin mr-2" />
-              ) : (
-                <FileSpreadsheet className="h-4 w-4 mr-2" />
-              )}
-              Excel
-            </Button>
-          </div>
+         <div className="flex justify-end gap-2 mb-4">
+  <Button
+    variant="outline"
+    disabled={pdfLoading}
+    onClick={handleDownloadPDF}
+  >
+    {pdfLoading ? (
+      <Loader className="h-4 w-4 animate-spin mr-2" />
+    ) : (
+      <Printer className="h-4 w-4 mr-2" />
+    )}
+    Download PDF
+  </Button>
 
+  <Button
+    variant="outline"
+    disabled={excelLoading}
+    onClick={exportToExcel}
+  >
+    {excelLoading ? (
+      <Loader className="h-4 w-4 animate-spin mr-2" />
+    ) : (
+      <FileSpreadsheet className="h-4 w-4 mr-2" />
+    )}
+    Excel
+  </Button>
+</div>
+
+<div ref={tableRef}>
           {/* Report Tabs */}
           <Tabs defaultValue="all" className="w-full">
             <TabsList className="grid grid-cols-3">
@@ -588,6 +606,7 @@ const AdminReportsPage = () => {
               </div>
             </TabsContent>
           </Tabs>
+          </div>
         </>
       )}
     </div>

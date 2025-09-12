@@ -1,7 +1,7 @@
 // nav-config.ts
 export const adminNav = [
   { title: "Dashboard", url: "/admin", icon: "layout-dashboard" },
-  { title: "Calendar", url: "/admin/calendar", icon: "calendar" },
+  { title: "Calendar", url: "/admin/admin-calender", icon: "calendar" },
   { title: "Time Off Requests", url: "/admin/time-off-requests", icon: "clock" },
   {
     title: "Company Settings",
