@@ -41,16 +41,16 @@ const getDaysBetween = (startDate: Date, endDate: Date) => {
   return days;
 };
 
-// Custom validation functions
+
 const validateForm = (formData: FormValues) => {
   const errors: Record<string, string> = {};
 
-  // Start date validation
+  
   if (!formData.startDate) {
     errors.startDate = "Start date is required";
   }
 
-  // End date validation
+ 
   if (!formData.endDate) {
     errors.endDate = "End date is required";
   } else if (formData.startDate && formData.endDate < formData.startDate) {
@@ -59,7 +59,7 @@ const validateForm = (formData: FormValues) => {
     errors.endDate = "End date must be today or in the future";
   }
 
-  // Type validation
+  
   if (!formData.type) {
     errors.type = "Time off type is required";
   }
@@ -197,7 +197,7 @@ const TimeOffRequestForm = ({
   const [dateOverlapError, setDateOverlapError] = useState<string | null>(null);
   const [calendarOpen, setCalendarOpen] = useState<boolean>(false);
   
-  // Form state
+  
   const [formData, setFormData] = useState<FormValues>({
     startDate: null,
     endDate: null,
@@ -208,7 +208,7 @@ const TimeOffRequestForm = ({
     customExcludedDates: [],
   });
   
-  // Form errors
+  
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   const createTimeOffRequestMutation = useMutation({
@@ -347,7 +347,7 @@ const TimeOffRequestForm = ({
       const timeOffRequestData = await createTimeOffRequestMutation.mutateAsync(submitData);
       if (timeOffRequestData) {
         toast.success("Time off request created successfully");
-        router.push("/employee/my-requests");
+        router.push("/employee/all-request");
       }
     } catch (error) {
       console.error("Error creating time off request:", error);
