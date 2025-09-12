@@ -63,7 +63,7 @@ export   function AppSidebar({ ...props }) {
      
       {
         title: "E-Requests List",
-        url: "/employee/my-requests",
+        url: "/employee/all-request",
         icon: Frame,
         isActive: false,
       },
