@@ -12,9 +12,10 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
-export function TeamSwitcher() {
+export function TeamSwitcher({ companyName }: { companyName: string | null }) {
+
   const { isMobile } = useSidebar()
-  const { data: session, status } = useSession()
+ 
 
   return (
     <SidebarMenu>
@@ -27,14 +28,7 @@ export function TeamSwitcher() {
             <GalleryVerticalEnd className="size-4" />
           </div>
           <div className="grid flex-1 text-left text-sm leading-tight">
-            {status === "loading" ? (
-              <span className="h-4 w-32 rounded bg-gray-300 animate-pulse" />
-            ) : (
-              <span className="truncate font-semibold">
-                {session?.user?.companyName || "Company"}
-              </span>
-            )}
-          
+            {companyName || "Company"}
             <span className="truncate text-xs">LeaveFlow CRM</span>
           </div>
           <ChevronsUpDown className="ml-auto" />

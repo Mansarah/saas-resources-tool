@@ -2,6 +2,7 @@
 "use client";
 
 import { ChevronRight } from "lucide-react";
+import * as Icons from "lucide-react";
 import { motion } from "framer-motion";
 import {
   Collapsible,
@@ -30,6 +31,14 @@ const itemVariants = {
 const buttonVariants = {
   hover: { scale: 1.05 },
 };
+
+// helper to convert "shopping-bag" → "ShoppingBag"
+function toPascalCase(str: string) {
+  return str
+    .split("-")
+    .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+    .join("");
+}
 
 export function NavMain({ items }: { items: any[] }) {
   const pathname = usePathname();
@@ -68,8 +77,13 @@ export function NavMain({ items }: { items: any[] }) {
           const hasSubItems = item.items && item.items.length > 0;
 
           const isParentActive = hasSubItems
-            ? item.items.some((subItem :any) => subItem.url === pathname)
+            ? item.items.some((subItem: any) => subItem.url === pathname)
             : pathname === item.url;
+
+        
+          const Icon =
+            (item.icon && (Icons as any)[toPascalCase(item.icon)]) ||
+            Icons.Circle;
 
           if (!hasSubItems) {
             return (
@@ -77,7 +91,7 @@ export function NavMain({ items }: { items: any[] }) {
                 <Link href={item.url} onClick={handleLinkClick}>
                   <motion.div variants={buttonVariants} whileHover="hover">
                     <SidebarMenuButton tooltip={item.title}>
-                      {item.icon && <item.icon />}
+                      <Icon className="h-4 w-4" />
                       <span
                         className={`transition-colors duration-200 ${
                           isParentActive
@@ -105,7 +119,7 @@ export function NavMain({ items }: { items: any[] }) {
                 <CollapsibleTrigger asChild>
                   <motion.div variants={buttonVariants} whileHover="hover">
                     <SidebarMenuButton tooltip={item.title}>
-                      {item.icon && <item.icon />}
+                      <Icon className="h-4 w-4" />
                       <span
                         className={`transition-colors duration-200 ${
                           isParentActive
@@ -127,7 +141,7 @@ export function NavMain({ items }: { items: any[] }) {
                   animate={isParentActive ? "open" : "closed"}
                 >
                   <SidebarMenuSub className="border-l border-blue-500">
-                    {item.items?.map((subItem:any) => {
+                    {item.items?.map((subItem: any) => {
                       const isSubItemActive = pathname === subItem.url;
                       return (
                         <SidebarMenuSubItem key={subItem.title}>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 import { AppBottombar } from "@/components/app-bottombar";
@@ -29,7 +30,20 @@ import ThemeToggler from "@/components/layout/header/ThemeToggle";
 
 
 
-export default function Page({ children }: { children?: React.ReactNode }) {
+export default function Page({
+  children,
+  navMain,
+  user,
+}: {
+  children?: React.ReactNode;
+  navMain: any[];
+  user: {
+    name: string;
+    role: string;
+    image: string | null;
+    companyName: string | null;
+  };
+}) {
    const router = useRouter();
   const [open, setOpen] = useState(false);
 
@@ -44,7 +58,7 @@ export default function Page({ children }: { children?: React.ReactNode }) {
     <SidebarProvider>
       {/* Desktop/Tablet Layout - Show sidebar normally */}
       <div className="hidden md:block">
-        <AppSidebar />
+       <AppSidebar navMain={navMain} user={user} />
       </div>
 
       <SidebarInset>

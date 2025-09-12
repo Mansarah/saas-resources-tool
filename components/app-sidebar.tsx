@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
 import {
   AudioWaveform,
@@ -24,114 +25,125 @@ import {
 
 
 
-export   function AppSidebar({ ...props }) {
+export function AppSidebar({
+  navMain,
+  user,
+}: {
+  navMain: any[];
+  user: {
+    name: string;
+    role: string;
+    image: string | null;
+    companyName: string | null;
+  };
+}) {
   
-  const initialData = {
+  // const initialData = {
    
-    navMain: [
-      {
-        title: "Dashboard",
-        url: "/admin",
-        icon: Frame,
-        isActive: false,
-      },
-      {
-        title: "E-Dashboard",
-        url: "/employee",
-        icon: Frame,
-        isActive: false,
-      },
-      {
-        title: "Calender",
-        url: "/admin/calender",
-        icon: Frame,
-        isActive: false,
-      },
-      {
-        title: "E-Calender",
-        url: "/employee/calender",
-        icon: Frame,
-        isActive: false,
-      },
-      {
-        title: "E-Requests",
-        url: "/employee/new-request",
-        icon: Frame,
-        isActive: false,
-      },
+  //   navMain: [
+  //     {
+  //       title: "Dashboard",
+  //       url: "/admin",
+  //       icon: Frame,
+  //       isActive: false,
+  //     },
+  //     {
+  //       title: "E-Dashboard",
+  //       url: "/employee",
+  //       icon: Frame,
+  //       isActive: false,
+  //     },
+  //     {
+  //       title: "Calender",
+  //       url: "/admin/calender",
+  //       icon: Frame,
+  //       isActive: false,
+  //     },
+  //     {
+  //       title: "E-Calender",
+  //       url: "/employee/calender",
+  //       icon: Frame,
+  //       isActive: false,
+  //     },
+  //     {
+  //       title: "E-Requests",
+  //       url: "/employee/new-request",
+  //       icon: Frame,
+  //       isActive: false,
+  //     },
      
      
-      {
-        title: "E-Requests List",
-        url: "/employee/all-request",
-        icon: Frame,
-        isActive: false,
-      },
+  //     {
+  //       title: "E-Requests List",
+  //       url: "/employee/all-request",
+  //       icon: Frame,
+  //       isActive: false,
+  //     },
      
      
-      {
-        title: "Time Off Requests",
-        url: "/admin/time-off-requests",
-        icon: ShoppingBag,
-        isActive: false,
-      },
+  //     {
+  //       title: "Time Off Requests",
+  //       url: "/admin/time-off-requests",
+  //       icon: ShoppingBag,
+  //       isActive: false,
+  //     },
       
-       {
-        title: "Company Settings",
-        url: "#",
-        icon: TicketPlus,
-        isActive: false,
-        items: [
-          {
-            title: "Profile",
-            url: "/admin/company-settings/profile",
-          },
-          {
-            title: "Holidays",
-            url: "/admin/company-settings/holidays",
-          },
-          {
-            title: "Working Days",
-            url: "/admin/company-settings/working-days",
-          },
+  //      {
+  //       title: "Company Settings",
+  //       url: "#",
+  //       icon: TicketPlus,
+  //       isActive: false,
+  //       items: [
+  //         {
+  //           title: "Profile",
+  //           url: "/admin/company-settings/profile",
+  //         },
+  //         {
+  //           title: "Holidays",
+  //           url: "/admin/company-settings/holidays",
+  //         },
+  //         {
+  //           title: "Working Days",
+  //           url: "/admin/company-settings/working-days",
+  //         },
          
-        ],
-      },
-       {
-        title: "Team management",
-        url: "#",
-        icon: TicketPlus,
-        isActive: false,
-        items: [
-          {
-            title: "Employees",
-            url: "/admin/team-management/employees",
-          },
-          {
-            title: "Invitation Codes",
-            url: "/admin/team-management/invitation-codes",
-          },
+  //       ],
+  //     },
+  //      {
+  //       title: "Team management",
+  //       url: "#",
+  //       icon: TicketPlus,
+  //       isActive: false,
+  //       items: [
+  //         {
+  //           title: "Employees",
+  //           url: "/admin/team-management/employees",
+  //         },
+  //         {
+  //           title: "Invitation Codes",
+  //           url: "/admin/team-management/invitation-codes",
+  //         },
          
          
-        ],
-      },
+  //       ],
+  //     },
      
-      {
-        title: "Report",
-        url: "/admin/report",
-        icon: Package,
-        isActive: false,
-      },
-      {
-        title: "Integration",
-        url: "/admin/integration",
-        icon: Package,
-        isActive: false,
-      },
+  //     {
+  //       title: "Report",
+  //       url: "/admin/report",
+  //       icon: Package,
+  //       isActive: false,
+  //     },
+  //     {
+  //       title: "Integration",
+  //       url: "/admin/integration",
+  //       icon: Package,
+  //       isActive: false,
+  //     },
     
      
-    ],
-  };
+  //   ],
+  // };
   // const initialData = {
   //   user: {
   //     name: `${nameL}`,
@@ -222,17 +234,18 @@ export   function AppSidebar({ ...props }) {
   // };
 
   return (
-    <Sidebar collapsible="icon" {...props}>
+    <Sidebar collapsible="icon" >
       <SidebarHeader>
-        <TeamSwitcher  />
+           <TeamSwitcher companyName={user.companyName} />
       </SidebarHeader>
       <SidebarContent className="sidebar-content">
         {/* <NavProjects projects={data.projects} /> */}
-        <NavMain items={initialData.navMain} />
+        {/* <NavMain items={initialData.navMain} /> */}
+          <NavMain items={navMain} />
         {/* <NavMainUser projects={initialData.userManagement} /> */}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser />
+       <NavUser user={user} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
