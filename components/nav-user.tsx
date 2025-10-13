@@ -1,3 +1,4 @@
+
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 import { ChevronsUpDown, Key, LogOut } from "lucide-react";
@@ -42,58 +43,30 @@ export function NavUser({
     <>
       <SidebarMenu>
         <SidebarMenuItem>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+ 
               <SidebarMenuButton
                 size="lg"
-                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+    className="  data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               >
                 <Avatar className="h-8 w-8 rounded-lg">
                                    <AvatarImage src={user.image || ""} alt="avatar image" />
-                  <AvatarFallback className="rounded-lg bg-blue-500 text-black">
+                  <AvatarFallback className="rounded-lg bg-[var(--team-color)] text-black">
                 {initialsChar}
                   </AvatarFallback>
                 </Avatar>
                 
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{user.name}</span>
+                  <span className="truncate font-semibold ">{user.name}</span>
                   <span className="truncate text-xs">{user.role}</span>
                 </div>
-                <ChevronsUpDown className="ml-auto size-4" />
+              <LogOut
+                onClick={() => setShowSignOutDialog(true)}
+              
+                className="ml-auto size-4  hover:text-red-600 hover:scale-125 "  />
+             
               </SidebarMenuButton>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-              side={isMobile ? "bottom" : "right"}
-              align="end"
-              sideOffset={4}
-            >
-              <DropdownMenuLabel className="p-0 font-normal">
-                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                  <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarImage src={user.image || ""} alt="user avatar" />
-                    <AvatarFallback className="rounded-lg bg-blue-500 text-black">
-                      {initialsChar}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">{user.name}</span>
-                    <span className="truncate text-xs">{user.role}</span>
-                  </div>
-                </div>
-              </DropdownMenuLabel>
-
-              <DropdownMenuSeparator />
-              {/* <DropdownMenuItem onClick={() => setOpen(true)}>
-                <Key />
-                <span className=" cursor-pointer">Change Password</span>
-              </DropdownMenuItem> */}
-              <DropdownMenuItem onClick={() => setShowSignOutDialog(true)}>
-                <LogOut />
-                <span className="cursor-pointer">Log out</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+        
+         
         </SidebarMenuItem>
       </SidebarMenu>
        

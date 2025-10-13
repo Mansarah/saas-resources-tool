@@ -1,3 +1,4 @@
+
 // components/team-switcher.tsx
 'use client';
 
@@ -22,9 +23,11 @@ export function TeamSwitcher({ companyName }: { companyName: string | null }) {
       <SidebarMenuItem>
         <SidebarMenuButton
           size="lg"
-          className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-        >
-          <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-blue-500 text-black">
+         className="bg-sidebar-accent data-text-sidebar-accent-foreground">
+            
+              <div
+                className="flex aspect-square size-8 items-center justify-center rounded-lg bg-[var(--team-color)] 
+ text-black">
             <GalleryVerticalEnd className="size-4" />
           </div>
           <div className="grid flex-1 text-left text-sm leading-tight">
