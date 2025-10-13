@@ -1,3 +1,4 @@
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -87,20 +88,19 @@ export function NavMain({ items }: { items: any[] }) {
 
           if (!hasSubItems) {
             return (
-              <SidebarMenuItem key={item.title}>
+             <SidebarMenuItem key={item.title}>
                 <Link href={item.url} onClick={handleLinkClick}>
                   <motion.div variants={buttonVariants} whileHover="hover">
-                    <SidebarMenuButton tooltip={item.title}>
+                    <SidebarMenuButton
+                      tooltip={item.title}
+                      className={`rounded-md transition-colors duration-200 ${
+                        isParentActive
+                          ? "bg-[var(--color-light)] text-[var(--color)] dark:bg-[var(--color-dark)] dark:text-[var(--color-dark-text)]"
+                          : "hover:bg-gray-100 dark:hover:bg-gray-800"
+                      }`}
+                    >
                       <Icon className="h-4 w-4" />
-                      <span
-                        className={`transition-colors duration-200 ${
-                          isParentActive
-                            ? "text-blue-500"
-                            : "hover:text-blue-500"
-                        }`}
-                      >
-                        {item.title}
-                      </span>
+                      <span>{item.title}</span>
                     </SidebarMenuButton>
                   </motion.div>
                 </Link>
@@ -109,7 +109,7 @@ export function NavMain({ items }: { items: any[] }) {
           }
 
           return (
-            <Collapsible
+             <Collapsible
               key={item.title}
               asChild
               defaultOpen={isParentActive}
@@ -118,17 +118,16 @@ export function NavMain({ items }: { items: any[] }) {
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
                   <motion.div variants={buttonVariants} whileHover="hover">
-                    <SidebarMenuButton tooltip={item.title}>
+                    <SidebarMenuButton
+                      tooltip={item.title}
+                      className={`rounded-md transition-colors duration-200 ${
+                        isParentActive
+                          ? "bg-[var(--color-light)] text-[var(--color)] dark:bg-[var(--color-dark)] dark:text-[var(--color-dark-text)]"
+                          : "hover:bg-gray-100 dark:hover:bg-gray-800"
+                      }`}
+                    >
                       <Icon className="h-4 w-4" />
-                      <span
-                        className={`transition-colors duration-200 ${
-                          isParentActive
-                            ? "text-blue-500"
-                            : "hover:text-blue-500"
-                        }`}
-                      >
-                        {item.title}
-                      </span>
+                      <span>{item.title}</span>
                       <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                     </SidebarMenuButton>
                   </motion.div>
@@ -147,16 +146,16 @@ export function NavMain({ items }: { items: any[] }) {
                         <SidebarMenuSubItem key={subItem.title}>
                           <SidebarMenuSubButton asChild>
                             <Link href={subItem.url} onClick={handleLinkClick}>
-                              <motion.span
-                                className={`transition-colors duration-200 ${
-                                  isSubItemActive
-                                    ? "text-blue-500 "
-                                    : "hover:text-blue-500"
-                                }`}
+                              <motion.div
                                 whileHover={{ scale: 1.05 }}
+                                className={`px-3 py-2 rounded-md transition-colors duration-200 ${
+                                  isSubItemActive
+                                    ? "bg-[var(--color-light)] text-[var(--color)] w-full rounded-xl dark:bg-[var(--color-dark)] dark:text-[var(--color-dark-text)]"
+                                    : ""
+                                }`}
                               >
                                 {subItem.title}
-                              </motion.span>
+                              </motion.div>
                             </Link>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>

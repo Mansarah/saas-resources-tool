@@ -36,7 +36,7 @@ export default async function Home() {
         <Brand />
           {/* <CustomerStories /> */}
             <Subscription />
-                 <Faq />
+                 {/* <Faq /> */}
                   <Solutions />
    </main>
   );

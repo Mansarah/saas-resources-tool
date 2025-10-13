@@ -64,7 +64,7 @@ export default function Page({
       <SidebarInset>
         {/* Header that appears on all screens */}
         {/* <header className="hidden sm:flex flex-row justify-between h-16 shrink-0   items-center gap-2 transition-[width,height] ease-linear"> */}
-           <header className="hidden sm:sticky  top-0 z-10 sm:flex h-16 shrink-0 items-center gap-2 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky  top-0 z-10 flex h-16 shrink-0 items-center justify-between gap-2 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="flex items-center gap-2 px-4">
 
             <SidebarTrigger className="-ml-1 hover:bg-blue-100" />
@@ -88,6 +88,7 @@ export default function Page({
               </BreadcrumbList>
             </Breadcrumb> */}
                <Breadcrumbs onBack={handleBackClick} />
+               {/* <ThemeToggler/> */}
           </div>
              {/* <ThemeToggler/> */}
         </header>
@@ -99,9 +100,9 @@ export default function Page({
 
         {/* Mobile header text - only shown on sm screens */}
 
-        <div className="sm:hidden sticky top-0 flex justify-between items-center px-4 py-2  border-b z-40 bg-white  rounded-b-lg shadow-sm">
+        {/* <div className="sm:hidden sticky top-0 flex justify-between items-center px-4 py-2  border-b z-40 bg-white  rounded-b-lg shadow-sm">
           <div className="font-semibold flex items-center space-x-2">
-            {/* <img src={logo} alt="logo"  className="h-8 w-full" /> */}
+            <img src={logo} alt="logo"  className="h-8 w-full" />
             <span>JAJU-CRM</span>
           </div>
           <DropdownMenu>
@@ -147,7 +148,7 @@ export default function Page({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        </div>
+        </div> */}
 
 
 
@@ -159,16 +160,25 @@ export default function Page({
 
 
         {/* Main content area - adjusted for mobile bottom nav */}
-        <div className="flex flex-1 flex-col gap-4 p-0 md:p-4 pt-0">
-          <div className="min-h-[calc(100vh-8rem)] md:min-h-[100vh] flex-1 rounded-xl p-2 pb-16  md:pb-2">
+        <main className="flex flex-1 flex-col gap-4  pt-0  ">
+          <div className="min-h-[calc(100vh-8rem)]  md:min-h-[100vh] flex-1 rounded-xl p-2">
             {children}
           </div>
-        </div>
+        </main>
+<footer className="hidden sm:block sticky bottom-0 z-10  h-8 shrink-0 items-center gap-2 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 ">
+<div className="flex items-center justify-between gap-2 p-2 text-xs rounded-md border-t-2 border-[var(--color-border)]">
+<span>© 2025-26 All Rights Reserved</span>
+<span>Crafted with ❤️ by LeaveFlow</span>
 
+
+
+   
+</div>
+</footer>
         {/* Mobile bottom navigation */}
-        <div className="sm:hidden ">
+        {/* <div className="sm:hidden ">
           <AppBottombar />
-        </div>
+        </div> */}
         {/* <ChangePassword setOpen={setOpen} open={open} /> */}
       </SidebarInset>
     </SidebarProvider>

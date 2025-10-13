@@ -24,7 +24,13 @@ export function Breadcrumbs({ onBack }: { onBack?: () => void }) {
         <span>Back</span>
       </button>
       */}
-
+ <button
+        onClick={onBack}
+        className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+      >
+        {/* <ArrowLeft className="h-4 w-4" /> */}
+        <span>Back</span>
+      </button>
       {visiblePathnames.length > 0 && (
         <>
           <ChevronRight className="h-4 w-4 text-muted-foreground" />
