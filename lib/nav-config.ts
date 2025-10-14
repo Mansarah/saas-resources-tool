@@ -28,7 +28,7 @@ export const adminNav = [
 
 export const employeeNav = [
   { title: "E-Dashboard", url: "/employee", icon: "layout-dashboard" },
-  { title: "E-Calendar", url: "/employee/calendar", icon: "calendar" },
+  { title: "E-Calendar", url: "/employee/calender", icon: "calendar" },
   { title: "E-Requests", url: "/employee/new-request", icon: "file-plus" },
   { title: "E-Requests List", url: "/employee/all-request", icon: "list" },
 ]
