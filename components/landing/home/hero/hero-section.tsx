@@ -65,7 +65,7 @@ function HeroSection() {
               <div className='flex flex-col items-center justify-center gap-8 w-full sm:flex-row'>
                 {/* ----------- Get started Link -------------- */}
                 <Link
-                  href='/contact'
+                  href={`/auth/signin`}
                   className='group bg-purple_blue text-white font-medium flex flex-row justify-between items-center py-2 px-5 rounded-full max-w-64 w-full md:py-3 border border-purple_blue transition-all duration-200 ease-in-out hover:bg-transparent hover:text-purple_blue'
                 >
                   <span className='flex text-start transform transition-transform duration-200 ease-in-out group-hover:translate-x-28'>

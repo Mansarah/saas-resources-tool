@@ -48,28 +48,28 @@ const Header = () => {
             <div className='flex items-center'>
               <Logo />
             </div>
-            <div className='hidden lg:flex bg-dark_black/5 dark:bg-white/5 rounded-3xl py-3 px-1'>
+            {/* <div className='hidden lg:flex bg-dark_black/5 dark:bg-white/5 rounded-3xl py-3 px-1'>
               <ul className='flex gap-0 2xl:gap-1.5'>
                 {headerData.map((item, index) => (
                   <HeaderLink key={index} item={item} />
                 ))}
               </ul>
-            </div>
+            </div> */}
             <div className='flex items-center gap-1 xl:gap-4'>
              
               
                 <div className='flex items-center gap-2'>
                   <Link
                     href={'/auth/signin'}
-                    className='hidden lg:block bg-transparent border border-dark_black dark:border-white/50 text-primary px-2.5 xl:px-4 py-2 rounded-full hover:bg-dark_black hover:text-white'>
-                    Sign Ina
+                    className='hidden lg:block bg-transparent border border-dark_black dark:border-white/50 text-primary px-2.5 xl:px-4 py-2 rounded-xl hover:bg-dark_black hover:text-white'>
+                   Dashboard
                   </Link>
                  
                 </div>
               {/* // )}  */}
 
               {/* ---------------------Light/Dark Mode button-------------------- */}
-              <ThemeToggler />
+              {/* <ThemeToggler /> */}
                 {/* menu  */}
               <div className='hidden max-lg:flex'>
                 <button onClick={() => setSidebarOpen(!sidebarOpen)}>
