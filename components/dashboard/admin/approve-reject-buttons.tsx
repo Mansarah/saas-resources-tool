@@ -18,7 +18,8 @@ import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 
-const ApproveRejectButtons = ({ id }: { id: string }) => {
+const ApproveRejectButtons = ({ id, employeeEmail }: { id: string; employeeEmail: string }) => {
+
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState<boolean>(false);

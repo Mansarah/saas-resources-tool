@@ -146,7 +146,7 @@ const EmployeeItem = ({ employee }: EmployeeItemProps) => (
 
 const Page = async () => {
   const session = await getServerSession(authOptions);
-
+  console.log('email session',session)
   if (!session?.user?.id) {
     redirect("/");
   }

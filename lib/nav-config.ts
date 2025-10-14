@@ -23,7 +23,7 @@ export const adminNav = [
     ],
   },
   { title: "Report", url: "/admin/report", icon: "bar-chart-3" },
-  { title: "Integration", url: "/admin/integration", icon: "puzzle" },
+  // { title: "Integration", url: "/admin/integration", icon: "puzzle" },
 ]
 
 export const employeeNav = [
