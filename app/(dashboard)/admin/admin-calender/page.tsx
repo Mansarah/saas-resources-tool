@@ -1,8 +1,10 @@
-
+import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import AdminCalendar from '@/components/dashboard/admin/admin-calendar';
-import { prisma } from '@/lib/prisma';
 
-async function getCalendarData() {
+async function getCalendarData(companyId: string) {
   try {
     // Fetch all time off requests
     const timeOffRequests = await prisma.timeOffRequest.findMany({
@@ -17,18 +19,31 @@ async function getCalendarData() {
         },
       },
       where: {
-        status: 'APPROVED',
+        employee: {
+          companyId: companyId,
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
       },
     });
 
     // Fetch company holidays
-    const companyHolidays = await prisma.companyHoliday.findMany();
+    const companyHolidays = await prisma.companyHoliday.findMany({
+      where: {
+        companyId: companyId,
+      },
+      orderBy: {
+        date: 'asc',
+      },
+    });
 
     // Fetch all employees with their leave data
     const employees = await prisma.user.findMany({
       where: {
+        companyId: companyId,
         role: {
-          in: ['EMPLOYEE', 'MANAGER'],
+          in: ['EMPLOYEE', 'MANAGER', 'ADMIN'],
         },
       },
       select: {
@@ -38,6 +53,7 @@ async function getCalendarData() {
         email: true,
         availableDays: true,
         department: true,
+        role: true,
         timeOffRequests: {
           where: {
             status: 'APPROVED',
@@ -50,6 +66,9 @@ async function getCalendarData() {
             workingDaysCount: true,
           },
         },
+      },
+      orderBy: {
+        createdAt: 'desc',
       },
     });
 
@@ -82,12 +101,36 @@ async function getCalendarData() {
   }
 }
 
-export default async function page() {
-  const calendarData = await getCalendarData();
+export default async function CalendarPage() {
+  const session = await getServerSession(authOptions);
+  
+  if (!session?.user?.id) {
+    redirect("/");
+  }
+
+  const adminUser = await prisma.user.findUnique({
+    where: {
+      id: session.user.id,
+    },
+    include: {
+      company: true,
+    },
+  });
+
+  if (!adminUser || !adminUser.company) {
+    redirect("/onboarding");
+  }
+
+  const companyId = adminUser.companyId;
+
+  if (!companyId) {
+    redirect("/onboarding");
+  }
+
+  const calendarData = await getCalendarData(companyId);
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6">Company Calendar</h1>
+    <div className="min-h-screen bg-gray-50">
       <AdminCalendar 
         timeOffRequests={calendarData.timeOffRequests} 
         companyHolidays={calendarData.companyHolidays}

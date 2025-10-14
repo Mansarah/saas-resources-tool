@@ -60,7 +60,7 @@ interface EmployeeItemProps {
 
 // StatCard component with div instead of Card
 const StatCard = ({ title, value, icon: Icon, color, description }: StatCardProps) => (
-  <div className="bg-white rounded-lg border border-gray-200 hover:shadow-md transition-all duration-200 p-3">
+  <div className="bg-white rounded-lg border border-purple-200 hover:shadow-md transition-all duration-200 p-3">
     <div className="flex items-center justify-between">
       <div className="space-y-1">
         <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">{title}</p>
@@ -79,7 +79,7 @@ const StatCard = ({ title, value, icon: Icon, color, description }: StatCardProp
 );
 
 const RequestItem = ({ request }: RequestItemProps) => (
-  <div className="group p-2 rounded border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all">
+  <div className="group p-2 rounded border border-purple-200 hover:border-gray-300 hover:bg-gray-50 transition-all">
     <div className="flex justify-between items-start gap-1 mb-1">
       <div className="min-w-0 flex-1">
         <h4 className="font-medium text-gray-900 text-sm leading-tight">
@@ -116,7 +116,7 @@ const RequestItem = ({ request }: RequestItemProps) => (
 );
 
 const EmployeeItem = ({ employee }: EmployeeItemProps) => (
-  <div className="group p-2 rounded border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all">
+  <div className="group p-2 rounded border border-purple-200 hover:border-gray-300 hover:bg-gray-50 transition-all">
     <div className="flex justify-between items-start gap-1">
       <div className="min-w-0 flex-1">
         <h4 className="font-medium text-gray-900 text-sm leading-tight">
@@ -146,7 +146,7 @@ const EmployeeItem = ({ employee }: EmployeeItemProps) => (
 
 const Page = async () => {
   const session = await getServerSession(authOptions);
-
+  console.log('email session',session)
   if (!session?.user?.id) {
     redirect("/");
   }
@@ -395,8 +395,8 @@ const Page = async () => {
         {/* Left Column - 4/5 width */}
         <div className="lg:col-span-4 space-y-3">
           {/* Quick Actions */}
-          <div className="bg-white rounded-lg border border-gray-200">
-            <div className="p-3 border-b border-gray-200">
+          <div className="bg-white rounded-lg border border-purple-200">
+            <div className="p-3 border-b border-purple-200">
               <h2 className="text-base font-semibold text-gray-900">Quick Actions</h2>
               <p className="text-xs text-gray-600 mt-0.5">
                 Frequently used management tools
@@ -425,8 +425,8 @@ const Page = async () => {
           </div>
 
           {/* Recent Time Off Requests */}
-          <div className="bg-white rounded-lg border border-gray-200">
-            <div className="p-3 border-b border-gray-200">
+          <div className="bg-white rounded-lg border border-purple-200">
+            <div className="p-3 border-b border-purple-200">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                   <div className="w-5 h-5 rounded bg-blue-50 flex items-center justify-center">
@@ -458,7 +458,7 @@ const Page = async () => {
                   </div>
                 )}
               </div>
-              <div className="mt-3 pt-3 border-t border-gray-200">
+              <div className="mt-3 pt-3 border-t border-purple-200">
                 <Button asChild variant="outline" size="sm" className="w-full text-xs">
                   <Link href="/admin/time-off-requests">
                     View All Requests
@@ -472,8 +472,8 @@ const Page = async () => {
         {/* Right Column - 1/5 width */}
         <div className="space-y-3">
           {/* Time Off Distribution */}
-          <div className="bg-white rounded-lg border border-gray-200">
-            <div className="p-3 border-b border-gray-200">
+          <div className="bg-white rounded-lg border border-purple-200">
+            <div className="p-3 border-b border-purple-200">
               <div className="flex items-center gap-1.5">
                 <div className="w-5 h-5 rounded bg-purple-50 flex items-center justify-center">
                   <PieChart className="w-3 h-3 text-purple-600" />
@@ -513,8 +513,8 @@ const Page = async () => {
           </div>
 
           {/* Recent Team Members */}
-          <div className="bg-white rounded-lg border border-gray-200">
-            <div className="p-3 border-b border-gray-200">
+          <div className="bg-white rounded-lg border border-purple-200">
+            <div className="p-3 border-b border-purple-200">
               <div className="flex items-center gap-1.5">
                 <div className="w-5 h-5 rounded bg-green-50 flex items-center justify-center">
                   <Users className="w-3 h-3 text-green-600" />
@@ -541,7 +541,7 @@ const Page = async () => {
                   </div>
                 )}
               </div>
-              <div className="mt-3 pt-3 border-t border-gray-200">
+              <div className="mt-3 pt-3 border-t border-purple-200">
                 <Button asChild variant="outline" size="sm" className="w-full text-xs">
                   <Link href="/admin/employees">
                     Manage Team

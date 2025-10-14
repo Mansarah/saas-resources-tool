@@ -67,7 +67,8 @@ const page = async ({
           <Link href="/admin/time-off-requests">Back to Time Off Requests</Link>
           <p className="text-2xl font-bold">Time off request details</p>
         </div>
-        {request.status === "PENDING" && <ApproveRejectButtons id={id} />}
+        {/* {request.status === "PENDING" && <ApproveRejectButtons id={id} />} */}
+        {request.status === "PENDING" && <ApproveRejectButtons id={id} employeeEmail={request.employee.email} />}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
