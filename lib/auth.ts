@@ -16,7 +16,6 @@ export const authOptions: NextAuthOptions = {
           prompt: "consent",
           access_type: "offline",
           response_type: "code"
-          
         }
       }
     }),
@@ -28,10 +27,13 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, account }) {
       // Initial sign in
       if (account && user) {
-        // Fetch the complete user from database to get role and onboarding status
+        // Fetch the complete user from database to get role, onboarding status, and subscription
         const dbUser = await prisma.user.findUnique({
           where: { email: user.email! },
-          include: { company: true },
+          include: { 
+            company: true,
+            subscription: true 
+          },
         });
         
         if (dbUser) {
@@ -42,6 +44,11 @@ export const authOptions: NextAuthOptions = {
           token.onboardingCompleted = dbUser.onboardingCompleted;
           token.firstName = dbUser.firstName;
           token.lastName = dbUser.lastName;
+          
+          // Add subscription status - convert Date to string
+          token.subscriptionStatus = dbUser.subscription?.[0]?.status || null;
+          token.planType = dbUser.subscription?.[0]?.planType || null;
+          token.stripeCurrentPeriodEnd = dbUser.subscription?.[0]?.stripeCurrentPeriodEnd?.toISOString() || null;
         }
       }
       
@@ -49,7 +56,10 @@ export const authOptions: NextAuthOptions = {
       if (!account && token.email) {
         const dbUser = await prisma.user.findUnique({
           where: { email: token.email as string },
-          include: { company: true },
+          include: { 
+            company: true,
+            subscription: true 
+          },
         });
         
         if (dbUser) {
@@ -59,6 +69,11 @@ export const authOptions: NextAuthOptions = {
           token.onboardingCompleted = dbUser.onboardingCompleted;
           token.firstName = dbUser.firstName;
           token.lastName = dbUser.lastName;
+          
+          // Update subscription status - convert Date to string
+          token.subscriptionStatus = dbUser.subscription?.[0]?.status || null;
+          token.planType = dbUser.subscription?.[0]?.planType || null;
+          token.stripeCurrentPeriodEnd = dbUser.subscription?.[0]?.stripeCurrentPeriodEnd?.toISOString() || null;
         }
       }
       
@@ -74,6 +89,10 @@ export const authOptions: NextAuthOptions = {
         session.user.firstName = token.firstName as string | null;
         session.user.lastName = token.lastName as string | null;
         
+        // Add subscription info to session
+        session.user.subscriptionStatus = token.subscriptionStatus as string | null;
+        session.user.planType = token.planType as string | null;
+        session.user.stripeCurrentPeriodEnd = token.stripeCurrentPeriodEnd as string | null;
       }
       return session;
     },
@@ -82,7 +101,11 @@ export const authOptions: NextAuthOptions = {
         try {
           const existingUser = await prisma.user.findUnique({
             where: { email: user.email! },
-            include: { accounts: true, company: true },
+            include: { 
+              accounts: true, 
+              company: true,
+              subscription: true 
+            },
           });
 
           if (existingUser) {
@@ -141,7 +164,7 @@ export const authOptions: NextAuthOptions = {
                     type: account.type,
                     provider: account.provider,
                     providerAccountId: account.providerAccountId,
-                    access_token: account.access_token, // Fixed typo: access_access_token → access_token
+                    access_token: account.access_token,
                     token_type: account.token_type,
                     id_token: account.id_token,
                     scope: account.scope,
@@ -165,8 +188,7 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: "/auth/signin",
-     
-       signOut: "/",
+    signOut: "/",
     error: "/auth/signin", 
     verifyRequest: "/auth/signin",
   },

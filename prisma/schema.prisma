@@ -127,7 +127,7 @@ model TimeOffRequest {
 
 model Subscription {
   id String @id @default(uuid())
-  userId String
+  userId String @unique  // Add unique constraint
   user User @relation(fields: [userId], references: [id])
   stripeSubscriptionId String? @unique
   stripeCustomerId String? @unique
@@ -136,6 +136,7 @@ model Subscription {
   stripeCancelAtPeriodEnd Boolean? @default(false)
   planType PlanType
   status SubscriptionStatus @default(ACTIVE)
+   isUpdatedPlan String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

@@ -1,4 +1,4 @@
-// app/api/admin/subscription/route.ts
+// app/api/admin/payment-history/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
@@ -15,9 +15,8 @@ export async function GET(request: NextRequest) {
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
       include: {
-        subscription: {  // Changed from 'subscriptions' to 'subscription'
+        subscription: {
           orderBy: { createdAt: 'desc' },
-          take: 1,
         },
       },
     });
@@ -26,18 +25,32 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    const subscription = user.subscription[0]; // Access as array
-    
-    if (!subscription) {
-      return NextResponse.json({ error: 'No subscription found' }, { status: 404 });
-    }
+    // Convert subscription data to payment history
+    const paymentHistory = user.subscription.map(sub => ({
+      id: sub.id,
+      amount: getPlanAmount(sub.planType),
+      status: sub.status,
+      createdAt: sub.createdAt,
+      planType: sub.planType,
+      stripeSessionId: sub.id,
+      isUpdatedPlan: sub.isUpdatedPlan, // Add the new field here
+    }));
 
-    return NextResponse.json(subscription);
+    return NextResponse.json(paymentHistory);
   } catch (error) {
-    console.error('Error fetching subscription:', error);
+    console.error('Error fetching payment history:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
     );
   }
+}
+
+function getPlanAmount(planType: string): number {
+  const planPrices: { [key: string]: number } = {
+    SEVEN_DAYS: 129,
+    FOURTEEN_DAYS: 299,
+    ONE_MONTH: 499,
+  };
+  return planPrices[planType] || 0;
 }

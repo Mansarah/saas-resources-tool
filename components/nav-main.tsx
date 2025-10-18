@@ -24,6 +24,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
 import { useSession } from "next-auth/react";
+import moment from "moment";
 
 const itemVariants = {
   open: { opacity: 1, height: "auto", transition: { duration: 0.3 } },
@@ -173,7 +174,9 @@ export function NavMain({ items }: { items: any[] }) {
       </SidebarMenu>
     </SidebarGroup>
 
-{session?.user?.role === "ADMIN" && (
+{session?.user?.role === "ADMIN" && 
+ (session?.user?.subscriptionStatus !== "ACTIVE" || 
+  moment().isAfter(moment(session?.user?.stripeCurrentPeriodEnd))) && (
 <div className="mt-auto p-3">
   <motion.div
     initial={{ opacity: 0, y: 10 }}
