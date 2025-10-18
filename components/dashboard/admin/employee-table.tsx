@@ -1,16 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import * as React from "react";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -20,157 +10,141 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import {
+  ColumnDef,
+  ColumnFiltersState,
+  SortingState,
+  VisibilityState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
-  SortingState,
-  ColumnFiltersState,
-  VisibilityState,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown, ChevronLeft, ChevronRight, Search } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { formatDate } from "@/lib/utils";
-import Link from "next/link";
+import { useState } from "react";
+import { ArrowUpDown, ChevronDown, Search } from "lucide-react";
+import AllowanceForm from "@/components/dashboard/admin/allowance-form";
 
-interface TimeOffRequest {
+interface Employee {
   id: string;
-  employee: {
-    firstName: string | null;
-    lastName: string | null;
-  };
-  startDate: Date;
-  endDate: Date;
-  type: string;
-  status: string;
-  manager: {
-    firstName: string | null;
-    lastName: string | null;
-  } | null;
-  createdAt: Date;
+  firstName: string | null;
+  lastName: string | null;
+  email: string;
+  role: string;
+  department: string | null;
+  availableDays: number | null;
 }
 
-interface TimeOffRequestTableProps {
-  data: TimeOffRequest[];
+interface AllowanceTableProps {
+  employees: Employee[];
 }
 
-export const TimeOffRequestTable: React.FC<TimeOffRequestTableProps> = ({ data }) => {
-  // ✅ Properly typed states
+const EmployeeTable = ({ employees }: AllowanceTableProps) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [globalFilter, setGlobalFilter] = useState("");
 
-  const columns = [
+  const columns: ColumnDef<Employee>[] = [
     {
-      id: "S. No.",
-      header: "S. No.",
-      cell: ({ row }: any) => (
-        <div className="text-xs font-medium">{row.index + 1}</div>
-      ),
-      size: 60,
-    },
-    {
-      accessorKey: "employee",
-      id: "Employee",
-      header: ({ column }: any) => (
+      accessorKey: "name",
+      id: "Name",
+      header: ({ column }) => (
         <Button
           variant="ghost"
           size="sm"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="px-2 h-8 text-xs"
+          className="px-2 h-8 text-xs font-medium"
         >
-          Employee
+          Name
           <ArrowUpDown className="ml-1 h-3 w-3" />
         </Button>
       ),
-      cell: ({ row }: any) => (
+      cell: ({ row }) => (
         <div className="text-[13px] font-medium">
-          {row.original.employee.firstName ?? "-"} {row.original.employee.lastName ?? ""}
+          {row.original.firstName} {row.original.lastName}
         </div>
       ),
+      size: 150,
     },
     {
-      id: "Leave Date",
-      header: "Leave Date",
-      cell: ({ row }: any) => (
-        <div className="text-[13px]">
-          {formatDate(row.original.startDate)} - {formatDate(row.original.endDate)}
+      accessorKey: "email",
+      id: "Email",
+      header: "Email",
+      cell: ({ row }) => <div className="text-xs font-medium">{row.getValue("Email")}</div>,
+      size: 200,
+    },
+    {
+      accessorKey: "department",
+      id: "Department",
+      header: "Department",
+      cell: ({ row }) => (
+        <div className="text-xs font-medium">
+          {row.getValue("Department") || "N/A"}
         </div>
       ),
+      size: 120,
     },
     {
-      accessorKey: "type",
-      id: "Type",
-      header: "Type",
-      cell: ({ row }: any) => (
-        <div className="text-[13px] capitalize">{row.original.type}</div>
-      ),
-    },
-    {
-      accessorKey: "status",
-      id: "Status",
-      header: "Status",
-      cell: ({ row }: any) => (
-        <Badge
-          variant={
-            row.original.status === "PENDING"
-              ? "secondary"
-              : row.original.status === "APPROVED"
-              ? "default"
-              : "destructive"
-          }
-        >
-          {row.original.status.charAt(0) + row.original.status.slice(1).toLowerCase()}
-        </Badge>
-      ),
-    },
-    {
-      accessorKey: "manager",
-      id: "Approved By",
-      header: "Approved By",
-      cell: ({ row }: any) => (
-        <div className="text-[13px]">
-          {row.original.manager
-            ? `${row.original.manager.firstName ?? "-"} ${row.original.manager.lastName ?? ""}`
-            : "-"}
+      accessorKey: "role",
+      id: "Role",
+      header: "Role",
+      cell: ({ row }) => (
+        <div className="text-xs font-medium">
+          {row.getValue("Role")}
         </div>
       ),
+      size: 120,
     },
     {
-      accessorKey: "createdAt",
-      id: "Created",
-      header: ({ column }: any) => (
+      accessorKey: "availableDays",
+      id: "Available Days",
+      header: ({ column }) => (
         <Button
           variant="ghost"
           size="sm"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="px-2 h-8 text-xs"
+          className="px-2 h-8 text-xs font-medium"
         >
-          Created
+          Available Days
           <ArrowUpDown className="ml-1 h-3 w-3" />
         </Button>
       ),
-      cell: ({ row }: any) => (
-        <div className="text-[13px]">{formatDate(row.original.createdAt)}</div>
+      cell: ({ row }) => (
+        <div className="text-xs font-medium">
+          {row.getValue("Available Days") || 0}
+        </div>
       ),
+      size: 120,
     },
     {
-      id: "Actions",
+      id: "actions",
       header: "Actions",
-      cell: ({ row }: any) => (
-        <Button variant="link" asChild className="text-xs">
-          <Link href={`/admin/time-off-requests/${row.original.id}`}>View</Link>
-        </Button>
-      ),
+      cell: ({ row }) => {
+        return (
+          <div className="flex flex-row">
+            <AllowanceForm
+              employeeId={row.original.id}
+              employeeName={`${row.original.firstName} ${row.original.lastName}`}
+             currentAllowance={row.original.availableDays || 0}
+            />
+          </div>
+        );
+      },
+      size: 120,
     },
   ];
 
   const table = useReactTable({
-    data,
+    data: employees,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -189,24 +163,24 @@ export const TimeOffRequestTable: React.FC<TimeOffRequestTableProps> = ({ data }
       rowSelection,
     },
     initialState: {
-      pagination: { pageSize: 10 },
+      pagination: {
+        pageSize: 10,
+      },
     },
   });
 
   return (
     <div className="max-w-full">
-      {/* 🔍 Search + Columns Dropdown */}
       <div className="flex items-center justify-between py-1">
         <div className="relative w-72">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
           <Input
-            placeholder="Search requests..."
-            value={globalFilter ?? ""}
-            onChange={(e) => setGlobalFilter(e.target.value)}
+            placeholder="Search employees..."
+            value={table.getState().globalFilter || ""}
+            onChange={(event) => table.setGlobalFilter(event.target.value)}
             className="pl-8 h-9 text-sm bg-gray-50 border-gray-200 focus:border-gray-300 focus:ring-gray-200"
           />
         </div>
-
         <div className="flex flex-col md:flex-row md:ml-auto gap-2 w-full md:w-auto">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -233,62 +207,71 @@ export const TimeOffRequestTable: React.FC<TimeOffRequestTableProps> = ({ data }
         </div>
       </div>
 
-      {/* 🧾 Table */}
-      <div className="rounded-none border min-h-[31rem] grid grid-cols-1">
+      {/* Table */}
+      <div className="rounded-none border min-h-[25rem] flex flex-col">
         <Table className="flex-1">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead
-                    key={header.id}
+                  <TableHead 
+                    key={header.id} 
                     className="h-10 px-3 bg-[var(--team-color)] text-[var(--label-color)] text-sm font-medium"
                     style={{ width: header.column.columnDef.size }}
                   >
                     {header.isPlaceholder
                       ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                   </TableHead>
                 ))}
               </TableRow>
             ))}
           </TableHeader>
-
+          
           <TableBody>
-            {data?.length === 0 ? (
-              <TableRow className="h-12">
-                <TableCell colSpan={columns.length} className="h-24 text-center text-sm">
-                  No time off requests found.
-                </TableCell>
-              </TableRow>
-            ) : (
+            {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} className="h-2 hover:bg-gray-50">
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                  className="h-2 hover:bg-gray-50"
+                >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className="px-3 py-1">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
+            ) : (
+              <TableRow className="h-12">
+                <TableCell colSpan={columns.length} className="h-24 text-center text-sm">
+                  No employees found.
+                </TableCell>
+              </TableRow>
             )}
           </TableBody>
         </Table>
       </div>
 
-      {/* 📄 Pagination */}
-      <div className="flex items-center justify-end  space-x-2 py-1">
+      {/* Pagination */}
+      <div className="flex items-center justify-end space-x-2 py-1">
         <div className="flex-1 text-sm text-muted-foreground">
-          Total Requests: {table.getFilteredRowModel().rows.length}
+          Total Employees: {table.getFilteredRowModel().rows.length}
         </div>
-        <div className="space-x-2  flex items-center">
+        <div className="space-x-2">
           <Button
             variant="outline"
             size="sm"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
-            <ChevronLeft className="h-4 w-4" />
             Previous
           </Button>
           <Button
@@ -298,10 +281,11 @@ export const TimeOffRequestTable: React.FC<TimeOffRequestTableProps> = ({ data }
             disabled={!table.getCanNextPage()}
           >
             Next
-            <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
       </div>
     </div>
   );
 };
+
+export default EmployeeTable;

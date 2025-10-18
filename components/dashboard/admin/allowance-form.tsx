@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
+import { Edit } from "lucide-react";
 
 
 interface AllowanceFormProps {
@@ -68,15 +69,21 @@ export default function AllowanceForm({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant={"outline"} size="sm">
-          Edit
-        </Button>
+     
+         <Button
+                          variant="ghost"
+                          size="icon"
+                       
+                          className="h-8 w-8"
+                        >
+                          <Edit className="h-3.5 w-3.5" />
+                        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Update Holiday allowance</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="space-y-2">
           <div className="space-y-2">
             <Label htmlFor="employee-name">Employee</Label>
             <Input id="employee-name" value={employeeName} disabled />

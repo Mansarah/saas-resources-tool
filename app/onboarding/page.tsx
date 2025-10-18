@@ -7,18 +7,21 @@ import { redirect } from "next/navigation";
 export default function OnboardingPage() {
   const { data: session, status } = useSession();
   
-  console.log("session", session);
+  // console.log("session", session);
   // console.log("status", status);
 
-   if (session) {
-      if (!session.user.onboardingCompleted) {
-        redirect("/onboarding");
-      } else if (session.user.role === "ADMIN") {
-        redirect("/admin");
-      } else if (session.user.role === "EMPLOYEE") {
-        redirect("/employee");
-      }
+if (session) {
+  if (session.user.onboardingCompleted) {
+    if (session.user.role === "ADMIN") {
+      redirect("/admin");
+    } else if (session.user.role === "EMPLOYEE") {
+      redirect("/employee");
+    } else {
+      redirect("/"); // fallback if needed
     }
+  }
+}
+
   
   if (status === "loading") {
     return (

@@ -46,13 +46,12 @@ if (!user?.companyId) {
 //   console.log(`initialWorkingDays`, initialWorkingDays);
 
   return (
-    <div className="">
+   <div className="max-w-full bg-white p-2 rounded-md">
       <div className="flex items-center justify-between mb-2">
-        <div>
-          <p className="text-3xl font-bold">Working Days</p>
-          <p className="text-gray-500">
-            Configure your company&apos;s working days
-          </p>
+       
+         <div>
+          <h1 className="text-xl font-bold text-gray-900">Working Days</h1>
+          <p className="text-xs text-gray-600 mt-0.5">          Configure your company&apos;s working days</p>
         </div>
      
       </div>

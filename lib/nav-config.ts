@@ -23,13 +23,13 @@ export const adminNav = [
     ],
   },
   { title: "Report", url: "/admin/report", icon: "bar-chart-3" },
-  { title: "Upgrade", url: "/admin/upgrade", icon: "bar-chart-3" },
+  // { title: "Upgrade", url: "/admin/upgrade", icon: "bar-chart-3" },
   // { title: "Integration", url: "/admin/integration", icon: "puzzle" },
 ]
 
 export const employeeNav = [
-  { title: "E-Dashboard", url: "/employee", icon: "layout-dashboard" },
-  { title: "E-Calendar", url: "/employee/calender", icon: "calendar" },
-  { title: "E-Requests", url: "/employee/new-request", icon: "file-plus" },
-  { title: "E-Requests List", url: "/employee/all-request", icon: "list" },
+  { title: "Dashboard", url: "/employee", icon: "layout-dashboard" },
+  { title: "Calendar", url: "/employee/calender", icon: "calendar" },
+  { title: "New Requests", url: "/employee/new-request", icon: "file-plus" },
+  { title: "Requests List", url: "/employee/all-request", icon: "list" },
 ]

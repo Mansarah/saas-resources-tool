@@ -108,12 +108,12 @@ export default async function page() {
 
   return (
     <div className="max-w-full mx-auto ">
-      <h1 className="text-3xl font-bold mb-6">My Calendar</h1>
+
       <EmployeeCalendar 
         employee={calendarData.employee}
         timeOffRequests={calendarData.timeOffRequests} 
         companyHolidays={calendarData.companyHolidays}
-        stats={calendarData.stats}
+       
       />
     </div>
   );

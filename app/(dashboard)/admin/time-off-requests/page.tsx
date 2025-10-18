@@ -27,7 +27,7 @@ const Page = async () => {
   });
 
   return (
-    <div className="space-y-3 bg-gray-50">
+ <div className="max-w-full bg-white p-2 rounded-md space-y-2">
      
        <div>
           <h1 className="text-xl font-bold text-gray-900">Time Off Requests</h1>

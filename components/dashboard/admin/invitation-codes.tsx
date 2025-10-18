@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -10,16 +9,40 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { CheckIcon, CopyIcon, PlusIcon, RefreshCwIcon } from "lucide-react";
-
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  CheckIcon,
+  CopyIcon,
+  PlusIcon,
+  RefreshCwIcon,
+  ArrowUpDown,
+  ChevronDown,
+  Search,
+} from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { Code } from "@prisma/client";
-
+import {
+  ColumnDef,
+  ColumnFiltersState,
+  SortingState,
+  VisibilityState,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
 
 interface InvitationCodesProps {
   initialCodes: Code[];
@@ -27,7 +50,11 @@ interface InvitationCodesProps {
 
 const InvitationCodes = ({ initialCodes }: InvitationCodesProps) => {
   const [codes, setCodes] = useState<Code[]>(initialCodes);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = useState({});
+  const [globalFilter, setGlobalFilter] = useState("");
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<Record<string, boolean>>({});
@@ -43,14 +70,128 @@ const InvitationCodes = ({ initialCodes }: InvitationCodesProps) => {
       queryClient.invalidateQueries({ queryKey: ["invitation-codes"] });
     },
   });
-  
+
   useEffect(() => {
     setCodes(initialCodes);
   }, [initialCodes]);
 
+  const columns: ColumnDef<Code>[] = [
+    {
+      accessorKey: "code",
+      id: "Code",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="px-2 h-8 text-xs font-medium"
+        >
+          Code
+          <ArrowUpDown className="ml-1 h-3 w-3" />
+        </Button>
+      ),
+      cell: ({ row }) => (
+        <div className="font-mono text-xs font-medium">
+          {row.getValue("Code")}
+        </div>
+      ),
+      size: 120,
+    },
+    {
+      accessorKey: "used",
+      id: "Status",
+      header: "Status",
+      cell: ({ row }) => (
+        <div className="text-xs font-medium">
+          {row.getValue("Status") ? (
+            <Badge variant="secondary" className="text-xs">
+              Used
+            </Badge>
+          ) : (
+            <Badge className="bg-green-500 text-white text-xs">
+              Active
+            </Badge>
+          )}
+        </div>
+      ),
+      size: 80,
+    },
+    {
+      accessorKey: "createdAt",
+      id: "Created",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="px-2 h-8 text-xs font-medium"
+        >
+          Created
+          <ArrowUpDown className="ml-1 h-3 w-3" />
+        </Button>
+      ),
+      cell: ({ row }) => (
+        <div className="text-xs font-medium">
+          {new Date(row.original.createdAt).toLocaleDateString()}
+        </div>
+      ),
+      size: 100,
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => {
+        const code = row.original;
+        return (
+          <div className="flex justify-end">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => copyToClipboard(code.code)}
+              disabled={code.used}
+              className="h-7 w-7 p-0"
+            >
+              {copied[code.code] ? (
+                <CheckIcon className="h-3 w-3" />
+              ) : (
+                <CopyIcon className="h-3 w-3" />
+              )}
+            </Button>
+          </div>
+        );
+      },
+      size: 60,
+    },
+  ];
+
+  const table = useReactTable({
+    data: codes,
+    columns,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onGlobalFilterChange: setGlobalFilter,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    state: {
+      sorting,
+      columnFilters,
+      globalFilter,
+      columnVisibility,
+      rowSelection,
+    },
+    initialState: {
+      pagination: {
+        pageSize: 10,
+      },
+    },
+  });
+
   const handleGenerateCode = async () => {
     setIsGenerating(true);
-    setIsLoading(true);
     setError(null);
 
     try {
@@ -63,7 +204,6 @@ const InvitationCodes = ({ initialCodes }: InvitationCodesProps) => {
       setError("Failed to generate code");
     } finally {
       setIsGenerating(false);
-      setIsLoading(false);
     }
   };
 
@@ -79,122 +219,164 @@ const InvitationCodes = ({ initialCodes }: InvitationCodesProps) => {
   };
 
   return (
-    <div className="">
-      <div className="flex items-center justify-between mb-2">
-        <div>
-          <p className="text-3xl font-bold">Invitation Codes</p>
-          <p className="text-gray-500">
-            Generate and manage invitation codes for your new employees.
+    <div className="max-w-full bg-white p-2 rounded-md">
+      <div className="flex flex-col space-y-4 ">
+        <div className="flex flex-col mb-2">
+          <h1 className="text-xl font-bold text-gray-900">Invitation Codes</h1>
+          <p className="text-xs text-gray-600 mt-0.5">
+            Generate and manage invitation codes for your new employees
           </p>
         </div>
-     
-      </div>
-      {error && (
-        <Alert variant={"destructive"}>
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-      <div className="flex justify-end">
-        <Button onClick={handleGenerateCode} disabled={isGenerating}>
-          {isGenerating ? (
-            <>
-              <RefreshCwIcon className="mr-2 h-4 w-4 animate-spin" />
-              Generating...
-            </>
-          ) : (
-            <>
-              <PlusIcon className="mr-2 h-4 w-4" />
-              Generate New code
-            </>
-          )}
-        </Button>
-      </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Active Invitation Codes</CardTitle>
-          <CardDescription>
-            Codes that can be used to join your company
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="flex justify-center py-8">
-              <RefreshCwIcon className="h-8 w-8 animate-spin text-gray-400" />
-            </div>
-          ) : codes?.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Code</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+
+        {error && (
+          <Alert variant={"destructive"} className="py-2">
+            <AlertDescription className="text-sm">{error}</AlertDescription>
+          </Alert>
+        )}
+
+        <div className="flex items-center justify-between py-1 ">
+          <div className="relative w-72">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
+            <Input
+              placeholder="Search codes..."
+              value={table.getState().globalFilter || ""}
+              onChange={(event) => table.setGlobalFilter(event.target.value)}
+              className="pl-8 h-9 text-sm bg-gray-50 border-gray-200 focus:border-gray-300 focus:ring-gray-200"
+            />
+          </div>
+          <div className="flex flex-col md:flex-row md:ml-auto gap-2 w-full md:w-auto">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-9">
+                  Columns <ChevronDown className="ml-2 h-3 w-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40">
+                {table
+                  .getAllColumns()
+                  .filter((column) => column.getCanHide())
+                  .map((column) => (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      className="text-xs capitalize"
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                    >
+                      {column.id}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Button 
+              onClick={handleGenerateCode} 
+              disabled={isGenerating}
+              size="sm"
+              className="h-9"
+            >
+              {isGenerating ? (
+                <>
+                  <RefreshCwIcon className="mr-2 h-3 w-3 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <PlusIcon className="mr-2 h-3 w-3" />
+                  Generate Code
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {/* Table */}
+        <div className="rounded-none border  grid grid-cols-1">
+          <Table className="flex-1">
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead 
+                      key={header.id} 
+                      className="h-10 px-3 bg-[var(--team-color)] text-[var(--label-color)] text-sm font-medium"
+                      style={{ width: header.column.columnDef.size }}
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  ))}
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {codes?.map((code) => (
-                  <TableRow key={code.id}>
-                    <TableCell className="font-mono text-lg">
-                      {code.code}
-                    </TableCell>
-                    <TableCell>
-                      {code.used ? (
-                        <Badge variant={"secondary"}>Used</Badge>
-                      ) : (
-                        <Badge
-                          variant={"default"}
-                          className="bg-green-500 text-white"
-                        >
-                          Active
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant={"ghost"}
-                        size={"sm"}
-                        onClick={() => copyToClipboard(code.code)}
-                        disabled={code.used}
-                      >
-                        {copied[code.code] ? (
-                          <CheckIcon className="h-4 w-4" />
-                        ) : (
-                          <CopyIcon className="h-4 w-4" />
+              ))}
+            </TableHeader>
+            
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                    className="h-2 hover:bg-gray-50"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id} className="px-3 py-1">
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
                         )}
-                        <span className="sr-only">Copy code</span>
-                      </Button>
-                    </TableCell>
+                      </TableCell>
+                    ))}
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          ) : (
-            <div className="flex justify-center py-8">
-              <p className="text-gray-500">No active codes</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-      <Card className="mt-2">
-        <CardHeader>
-          <CardTitle>How to use invitation codes</CardTitle>
-          <CardDescription>
-            Share these codes with your employees to join your company
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ol className="list-decimal pl-5 space-y-2">
+                ))
+              ) : (
+                <TableRow className="h-12">
+                  <TableCell colSpan={columns.length} className="h-24 text-center text-sm">
+                    No invitation codes found.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* Pagination */}
+        <div className="flex items-center justify-end space-x-2 ">
+          <div className="flex-1 text-sm text-muted-foreground">
+            Total Codes: {table.getFilteredRowModel().rows.length}
+          </div>
+          <div className="space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+
+        {/* Usage Instructions */}
+        <div className="mt-2 p-4 border rounded-lg bg-white">
+          <h3 className="text-sm font-semibold mb-2">How to use invitation codes</h3>
+          <ol className="list-decimal pl-5 space-y-1 text-xs text-gray-600">
             <li>Generate a new invitation code using the button above</li>
-            <li>Share the 6-digit code with your employee</li>
-            <li>
-              The employee will sign up and enter this code during onboarding
-            </li>
-            <li>
-              Once used, the code will be marked as &quot;Used&quot; and cannot
-              be used again
-            </li>
+            <li>Share the code with your employee</li>
+            <li>The employee will enter this code during onboarding</li>
+            <li>Once used, the code will be marked as &quot;Used&quot; and cannot be reused</li>
           </ol>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };
