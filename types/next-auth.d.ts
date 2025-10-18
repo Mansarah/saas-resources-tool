@@ -9,6 +9,9 @@ declare module "next-auth" {
     onboardingCompleted: boolean;
     firstName?: string | null;
     lastName?: string | null;
+    subscriptionStatus?: string | null;
+    planType?: string | null;
+    stripeCurrentPeriodEnd?: string | null;
   }
 
   interface Session extends DefaultSession {
@@ -23,6 +26,9 @@ declare module "next-auth" {
       onboardingCompleted: boolean;
       firstName?: string | null;
       lastName?: string | null;
+      subscriptionStatus?: string | null;
+      planType?: string | null;
+      stripeCurrentPeriodEnd?: string | null;
     };
   }
 }
@@ -35,5 +41,8 @@ declare module "next-auth/jwt" {
     onboardingCompleted?: boolean;
     firstName?: string | null;
     lastName?: string | null;
+    subscriptionStatus?: string | null;
+    planType?: string | null;
+    stripeCurrentPeriodEnd?: string | null;
   }
 }

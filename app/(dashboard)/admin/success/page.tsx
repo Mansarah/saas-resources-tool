@@ -2,11 +2,10 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { useSession } from 'next-auth/react';
-import { CheckCircle2, Calendar, Crown, Zap, ArrowRight, History, Settings } from 'lucide-react';
+import { CheckCircle2, Calendar, Crown, Zap, ArrowRight, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 interface Subscription {
   id: string;
@@ -79,127 +78,97 @@ export default function SuccessPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-          <h2 className="text-xl font-semibold text-gray-700">Setting up your account...</h2>
-          <p className="text-gray-500 mt-2">This will just take a moment</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-3"></div>
+          <h2 className="text-sm font-medium text-gray-700">Setting up your account...</h2>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="max-w-md w-full">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <CheckCircle2 className="w-10 h-10 text-green-600" />
+        <div className="text-center mb-6">
+          <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+            <CheckCircle2 className="w-6 h-6 text-green-600" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Payment Successful!</h1>
-          <p className="text-lg text-gray-600 max-w-md mx-auto">
-            Welcome aboard! Your subscription is now active and you have full access to all features.
+          <h1 className="text-xl font-bold text-gray-900 mb-2">Payment Successful!</h1>
+          <p className="text-sm text-gray-600">
+            Your subscription is now active with full access to all features.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Subscription Details */}
-          <div className="lg:col-span-2 space-y-6">
-            <Card className="border-2 border-green-200 bg-green-50">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-green-800">
-                  <CheckCircle2 className="h-5 w-5" />
-                  Subscription Active
-                </CardTitle>
-                <CardDescription>
-                  Your plan details and next steps
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {subscription ? (
-                  <>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm font-medium text-gray-500">Plan Type</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          {(() => {
-                            const IconComponent = getPlanIcon(subscription.planType);
-                            return <IconComponent className="h-4 w-4 text-indigo-600" />;
-                          })()}
-                          <p className="font-semibold text-gray-900">
-                            {formatPlanName(subscription.planType)}
-                          </p>
-                        </div>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-500">Status</p>
-                        <p className="font-semibold text-green-600 capitalize">{subscription.status.toLowerCase()}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-500">Expires</p>
-                        <p className="font-semibold text-gray-900">
-                          {new Date(subscription.stripeCurrentPeriodEnd).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-500">Days Remaining</p>
-                        <p className="font-semibold text-blue-600">
-                          {calculateDaysRemaining(subscription.stripeCurrentPeriodEnd)} days
-                        </p>
-                      </div>
-                    </div>
-                    
-                      <Card>
-              <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-                <CardDescription>
-                  Get started with these actions
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Button 
-                    onClick={() => router.push('/dashboard')}
-                    className="h-auto py-4 justify-start"
-                    variant="outline"
-                  >
-                    <div className="text-left">
-                      <p className="font-semibold">Go to Dashboard</p>
-                      <p className="text-sm text-gray-500">Start using the application</p>
-                    </div>
-                    <ArrowRight className="ml-auto h-4 w-4" />
-                  </Button>
-                  
-                  <Button 
-                    onClick={() => router.push('/admin/subscription')}
-                    className="h-auto py-4 justify-start"
-                    variant="outline"
-                  >
-                    <div className="text-left">
-                      <p className="font-semibold">Manage Subscription</p>
-                      <p className="text-sm text-gray-500">View history and upgrade</p>
-                    </div>
-                    <Settings className="ml-auto h-4 w-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-                  </>
-                ) : (
-                  <div className="text-center py-8">
-                    <p className="text-gray-500">No subscription details found.</p>
-                    {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Quick Actions */}
-         
+        {/* Subscription Details */}
+        <div className="bg-white rounded-lg border border-green-200 p-4 mb-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Badge className="bg-green-100 text-green-700 border-green-200 text-xs">
+                Active
+              </Badge>
+              <span className="text-xs text-gray-500">Subscription</span>
+            </div>
+            {subscription && (
+              <div className="text-right">
+                <p className="text-xs font-medium text-gray-900">
+                  {calculateDaysRemaining(subscription.stripeCurrentPeriodEnd)} days left
+                </p>
+              </div>
+            )}
           </div>
+          
+          {subscription ? (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-indigo-100 rounded flex items-center justify-center">
+                    {(() => {
+                      const IconComponent = getPlanIcon(subscription.planType);
+                      return <IconComponent className="h-4 w-4 text-indigo-600" />;
+                    })()}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 text-sm">
+                      {formatPlanName(subscription.planType)}
+                    </h3>
+                    <p className="text-xs text-gray-500">
+                      Renews {new Date(subscription.stripeCurrentPeriodEnd).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-3">
+              <p className="text-gray-500 text-sm">No subscription details found.</p>
+              {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+            </div>
+          )}
+        </div>
 
-       
+        {/* Quick Actions */}
+        <div className="space-y-3">
+          <Button 
+          onClick={() => router.push('/admin/subscription')}
+            className="w-full h-11 justify-between"
+            size="sm"
+          >
+            <span className="flex items-center gap-2">
+       Manage Subscription
+            </span>
+            <Settings className="h-4 w-4" />
+          </Button>
+          
+         
+        </div>
+
+        {/* Help Text */}
+        <div className="text-center mt-4">
+          <p className="text-xs text-gray-500">
+            Need help? Contact our support team for assistance.
+          </p>
         </div>
       </div>
     </div>

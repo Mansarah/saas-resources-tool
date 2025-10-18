@@ -3,20 +3,19 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
   Calendar, 
   Crown, 
   Zap, 
-  ArrowUpRight, 
   History, 
-  Plus, 
-  CreditCard,
+  Plus,
   CheckCircle2,
   Clock,
-  Download
+  ArrowUpDown,
+  ChevronDown,
+  Search,
 } from 'lucide-react';
 import {
   Table,
@@ -26,6 +25,25 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+  ColumnDef,
+  SortingState,
+  ColumnFiltersState,
+  VisibilityState,
+} from "@tanstack/react-table";
 
 interface Subscription {
   id: string;
@@ -34,6 +52,7 @@ interface Subscription {
   stripeCurrentPeriodEnd: string;
   stripeCurrentPeriodStart: string;
   createdAt: string;
+  isUpdatedPlan?: string | null;
 }
 
 interface PaymentHistory {
@@ -43,7 +62,8 @@ interface PaymentHistory {
   createdAt: string;
   planType: string;
   stripeSessionId?: string;
-  isUpdatedPlan?: string;
+  isUpdatedPlan?: string | null;
+  stripeCurrentPeriodEnd?: string;
 }
 
 export default function SubscriptionDashboard() {
@@ -52,6 +72,13 @@ export default function SubscriptionDashboard() {
   const [loading, setLoading] = useState(true);
   const { data: session } = useSession();
   const router = useRouter();
+
+  // Table states with proper types
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = useState({});
+  const [globalFilter, setGlobalFilter] = useState("");
 
   useEffect(() => {
     if (session?.user) {
@@ -66,14 +93,21 @@ export default function SubscriptionDashboard() {
         fetch('/api/admin/payment-history')
       ]);
 
+      let subData = null;
+      
       if (subResponse.ok) {
-        const subData = await subResponse.json();
+        subData = await subResponse.json();
         setSubscription(subData);
       }
 
       if (paymentsResponse.ok) {
         const paymentsData = await paymentsResponse.json();
-        setPaymentHistory(paymentsData);
+        // Add renewal date to payment history based on subscription data
+        const paymentHistoryWithRenewal = paymentsData.map((payment: PaymentHistory) => ({
+          ...payment,
+          stripeCurrentPeriodEnd: subData?.stripeCurrentPeriodEnd || payment.createdAt
+        }));
+        setPaymentHistory(paymentHistoryWithRenewal);
       }
     } catch (error) {
       console.error('Error fetching subscription data:', error);
@@ -100,19 +134,6 @@ export default function SubscriptionDashboard() {
       .split('_')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
-  };
-
-  const getStatusVariant = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'active':
-        return 'default';
-      case 'canceled':
-        return 'destructive';
-      case 'past_due':
-        return 'destructive';
-      default:
-        return 'secondary';
-    }
   };
 
   const getPaymentStatusVariant = (status: string) => {
@@ -151,9 +172,175 @@ export default function SubscriptionDashboard() {
     router.push('/admin/upgrade');
   };
 
-  const handleDownloadInvoice = async (sessionId: string) => {
-    // Implement invoice download logic
-    console.log('Download invoice for session:', sessionId);
+  // Table columns definition with proper types
+  const columns: ColumnDef<PaymentHistory>[] = [
+    {
+      id: "S. No.",
+      header: "S. No.",
+      cell: ({ row }) => {
+        const globalIndex = row.index + 1;
+        return <div className="text-xs font-medium">{globalIndex}</div>;
+      },
+      size: 60,
+    },
+    {
+      accessorKey: "createdAt",
+      id: "Created Date",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="px-2 h-8 text-xs"
+        >
+          Created Date
+          <ArrowUpDown className="ml-1 h-3 w-3" />
+        </Button>
+      ),
+      cell: ({ row }) => (
+        <div className="text-[13px] font-medium">
+          {new Date(row.getValue("Created Date")).toLocaleDateString()}
+        </div>
+      ),
+      size: 120,
+    },
+    {
+      accessorKey: "stripeCurrentPeriodEnd",
+      id: "Renewal Date",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="px-2 h-8 text-xs"
+        >
+          Renewal Date
+          <ArrowUpDown className="ml-1 h-3 w-3" />
+        </Button>
+      ),
+      cell: ({ row }) => (
+        <div className="text-[13px] font-medium">
+          {new Date(row.getValue("Renewal Date")).toLocaleDateString()}
+        </div>
+      ),
+      size: 120,
+    },
+    {
+      accessorKey: "planType",
+      id: "Plan",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="px-2 h-8 text-xs"
+        >
+          Plan
+          <ArrowUpDown className="ml-1 h-3 w-3" />
+        </Button>
+      ),
+      cell: ({ row }) => {
+        const planType = row.getValue("Plan") as string;
+        const IconComponent = getPlanIcon(planType);
+        return (
+          <div className="flex items-center gap-2 text-[13px] font-medium">
+            <IconComponent className="h-4 w-4 text-indigo-600" />
+            {formatPlanName(planType)}
+          </div>
+        );
+      },
+      size: 150,
+    },
+    {
+      accessorKey: "amount",
+      id: "Amount",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="px-2 h-8 text-xs"
+        >
+          Amount
+          <ArrowUpDown className="ml-1 h-3 w-3" />
+        </Button>
+      ),
+      cell: ({ row }) => (
+        <div className="text-[13px] font-medium">₹{row.getValue("Amount")}</div>
+      ),
+      size: 100,
+    },
+    {
+      accessorKey: "status",
+      id: "Status",
+      header: "Status",
+      cell: ({ row }) => (
+        <Badge 
+          variant={getPaymentStatusVariant(row.getValue("Status"))}
+          className="text-xs"
+        >
+          {row.getValue("Status")}
+        </Badge>
+      ),
+      size: 120,
+    },
+    {
+      accessorKey: "isUpdatedPlan",
+      id: "Upgrade Info",
+      header: "Upgrade Info",
+      cell: ({ row }) => {
+        const upgradeInfo = row.getValue("Upgrade Info");
+        return upgradeInfo ? (
+          <div className="max-w-xs">
+            <Badge variant="outline" className="bg-blue-50 text-blue-700 text-xs border-blue-200">
+              Plan Updated
+            </Badge>
+            <p className="text-xs text-gray-600 mt-1">{upgradeInfo as string}</p>
+          </div>
+        ) : (
+          <span className="text-xs text-gray-400">-</span>
+        );
+      },
+      size: 200,
+    },
+  ];
+
+  const table = useReactTable({
+    data: paymentHistory || [],
+    columns,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onGlobalFilterChange: setGlobalFilter,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    state: {
+      sorting,
+      columnFilters,
+      globalFilter,
+      columnVisibility,
+      rowSelection,
+    },
+    initialState: {
+      pagination: {
+        pageSize: 10,
+      },
+    },
+  });
+
+  const TableShimmer = () => {
+    return Array.from({ length: 10 }).map((_, index) => (
+      <TableRow key={index} className="animate-pulse h-11">
+        {table.getVisibleFlatColumns().map((column) => (
+          <TableCell key={column.id} className="py-1">
+            <div className="h-8 bg-gray-200 rounded w-full"></div>
+          </TableCell>
+        ))}
+      </TableRow>
+    ));
   };
 
   if (loading) {
@@ -164,186 +351,242 @@ export default function SubscriptionDashboard() {
     );
   }
 
+  const hasUpgradePlan = subscription?.isUpdatedPlan != null;
+
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 ">
+      <div className="max-w-full mx-auto px-2">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Subscription Management</h1>
-            <p className="text-gray-600 mt-2">Manage your plans and view payment history</p>
+        <div className="mb-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+            <div>
+              <h1 className="text-xl font-bold text-gray-900">Subscription Management</h1>
+              <p className="text-xs text-gray-600">Manage your plans and view payment history</p>
+            </div>
+            <Button onClick={handleUpgrade} size="sm" className="w-full sm:w-auto">
+              <Plus className="h-4 w-4 mr-2" />
+              Upgrade Plan
+            </Button>
           </div>
-          <Button onClick={handleUpgrade}>
-            <Plus className="h-4 w-4 mr-2" />
-            Upgrade Plan
-          </Button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Left Column - Payment History Table */}
-          <div className="lg:col-span-3 space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <History className="h-5 w-5" />
-                  Payment History
-                </CardTitle>
-                <CardDescription>
-                  Your recent payments and transactions
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {paymentHistory.length > 0 ? (
-                  <div className="rounded-md border">
-               
-<Table>
-  <TableHeader>
-    <TableRow>
-      <TableHead>Date</TableHead>
-      <TableHead>Plan</TableHead>
-      <TableHead>Amount</TableHead>
-      <TableHead>Status</TableHead>
-      <TableHead>Upgrade Info</TableHead> {/* New column */}
-      <TableHead className="text-right">Actions</TableHead>
-    </TableRow>
-  </TableHeader>
-  <TableBody>
-    {paymentHistory.map((payment) => (
-      <TableRow key={payment.id}>
-        <TableCell className="font-medium">
-          {new Date(payment.createdAt).toLocaleDateString()}
-        </TableCell>
-        <TableCell>
-          <div className="flex items-center gap-2">
-            {(() => {
-              const IconComponent = getPlanIcon(payment.planType);
-              return <IconComponent className="h-4 w-4 text-indigo-600" />;
-            })()}
-            {formatPlanName(payment.planType)}
-          </div>
-        </TableCell>
-        <TableCell>₹{payment.amount}</TableCell>
-        <TableCell>
-          <Badge variant={getPaymentStatusVariant(payment.status)}>
-            {payment.status}
-          </Badge>
-        </TableCell>
-        <TableCell>
-          {payment.isUpdatedPlan ? (
-            <div className="max-w-xs">
-              <Badge variant="outline" className="bg-blue-50 text-blue-700 text-xs">
-                Plan Updated
-              </Badge>
-              <p className="text-xs text-gray-600 mt-1">{payment.isUpdatedPlan}</p>
+        {/* Current Plan Status - Compact Version */}
+        <div className="mb-2">
+          <div className={`rounded-lg border p-4 ${
+            hasUpgradePlan 
+              ? 'bg-blue-50 border-blue-200' 
+              : 'bg-indigo-50 border-indigo-200'
+          }`}>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                  hasUpgradePlan ? 'bg-blue-200' : 'bg-indigo-200'
+                }`}>
+                  {subscription ? (() => {
+                    const IconComponent = getPlanIcon(subscription.planType);
+                    return <IconComponent className={`h-4 w-4 ${
+                      hasUpgradePlan ? 'text-blue-700' : 'text-indigo-700'
+                    }`} />;
+                  })() : <Clock className="h-4 w-4 text-gray-500" />}
+                </div>
+                <div>
+                  <h2 className="text-sm font-semibold text-gray-900">Current Plan</h2>
+                  <p className="text-xs text-gray-600">
+                    {subscription ? 'Active subscription' : 'No active subscription'}
+                  </p>
+                </div>
+              </div>
+              {subscription && (
+                <Badge 
+                  className={`text-xs ${
+                    hasUpgradePlan 
+                      ? 'bg-blue-100 text-blue-700 border-blue-200' 
+                      : 'bg-indigo-100 text-indigo-700 border-indigo-200'
+                  }`}
+                >
+                  {subscription.status.toLowerCase()}
+                  {hasUpgradePlan && ' • Upgraded'}
+                </Badge>
+              )}
             </div>
-          ) : (
-            <span className="text-xs text-gray-400">-</span>
-          )}
-        </TableCell>
-        <TableCell className="text-right">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => payment.stripeSessionId && handleDownloadInvoice(payment.stripeSessionId)}
-          >
-            <Download className="h-4 w-4" />
-          </Button>
-        </TableCell>
-      </TableRow>
-    ))}
-  </TableBody>
-</Table>
+            
+            {subscription ? (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-bold text-gray-900 text-lg">
+                      {formatPlanName(subscription.planType)}
+                    </h3>
+                    <p className="text-sm text-gray-600">₹{getPlanAmount(subscription.planType)}</p>
                   </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <History className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                    <p className="text-gray-500">No payment history found</p>
-                    <Button onClick={handleUpgrade} className="mt-4">
-                      Get Started
-                    </Button>
+                  <div className="text-right">
+                    <p className="text-sm font-semibold text-gray-900">
+                      {calculateDaysRemaining(subscription.stripeCurrentPeriodEnd)} days left
+                    </p>
+                    <p className="text-xs text-gray-600">
+                      Renews {new Date(subscription.stripeCurrentPeriodEnd).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+
+                {hasUpgradePlan && (
+                  <div className="flex items-start gap-2 text-xs bg-white rounded p-2 border">
+                    <CheckCircle2 className="h-3 w-3 mt-0.5 flex-shrink-0 text-blue-600" />
+                    <span className="text-gray-700">
+                      {subscription.isUpdatedPlan}
+                    </span>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            ) : (
+              <div className="text-center py-3">
+                <p className="text-gray-600 mb-3 text-sm">No active subscription found</p>
+                <Button 
+                  onClick={handleUpgrade}
+                  size="sm"
+                  className="bg-indigo-600 text-white hover:bg-indigo-700"
+                >
+                  Choose a Plan
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Payment History Table */}
+        <div className="rounded-lg border border-gray-200 bg-white">
+          <div className="p-2 border-b border-gray-200">
+            <div className="flex items-center gap-2 mb-1">
+              <History className="h-4 w-4 text-gray-600" />
+              <h2 className="text-lg font-semibold text-gray-900">Payment History</h2>
+            </div>
+            <p className="text-sm text-gray-600">
+              Your recent payments and transactions
+            </p>
+          </div>
+          
+          <div className="p-2 border-b border-gray-200">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 py-1">
+              <div className="relative w-full sm:w-72">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
+                <Input
+                  placeholder="Search payments..."
+                  value={table.getState().globalFilter || ""}
+                  onChange={(event) => table.setGlobalFilter(event.target.value)}
+                  className="pl-8 h-9 text-sm bg-gray-50 border-gray-200 focus:border-gray-300 focus:ring-gray-200 w-full"
+                />
+              </div>
+              <div className="flex flex-col sm:flex-row sm:ml-auto gap-2 w-full sm:w-auto">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-9 w-full sm:w-auto">
+                      Columns <ChevronDown className="ml-2 h-3 w-3" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-40">
+                    {table
+                      .getAllColumns()
+                      .filter((column) => column.getCanHide())
+                      .map((column) => (
+                        <DropdownMenuCheckboxItem
+                          key={column.id}
+                          className="text-xs capitalize"
+                          checked={column.getIsVisible()}
+                          onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                        >
+                          {column.id}
+                        </DropdownMenuCheckboxItem>
+                      ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
           </div>
 
-          {/* Right Column - Active Plan Card */}
-          <div className="space-y-6">
-            {/* Active Plan Card */}
-            <Card className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white border-0 shadow-lg">
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center justify-between text-white">
-                  <span>Active Plan</span>
-                  <CreditCard className="h-5 w-5" />
-                </CardTitle>
-                <CardDescription className="text-indigo-100">
-                  Your current subscription
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {subscription ? (
-                  <>
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-                        {(() => {
-                          const IconComponent = getPlanIcon(subscription.planType);
-                          return <IconComponent className="h-6 w-6 text-white" />;
-                        })()}
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-lg">
-                          {formatPlanName(subscription.planType)}
-                        </h3>
-                        <Badge variant="secondary" className="bg-white/20 text-white border-0">
-                          {subscription.status.toLowerCase()}
-                        </Badge>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-indigo-100">Plan Amount</span>
-                        <span className="font-semibold">
-                          ₹{getPlanAmount(subscription.planType)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-indigo-100">Days Remaining</span>
-                        <span className="font-semibold">
-                          {calculateDaysRemaining(subscription.stripeCurrentPeriodEnd)} days
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-indigo-100">Renewal Date</span>
-                        <span className="font-semibold">
-                          {new Date(subscription.stripeCurrentPeriodEnd).toLocaleDateString()}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="pt-4 border-t border-white/20">
-                      <div className="flex items-center gap-2 text-sm text-indigo-100">
-                        <CheckCircle2 className="h-4 w-4" />
-                        <span>Active until {new Date(subscription.stripeCurrentPeriodEnd).toLocaleDateString()}</span>
-                      </div>
-                    </div>
-                  </>
+          {/* Table */}
+          <div className="rounded-none border-b min-h-[25rem] grid grid-cols-1">
+            <Table>
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id} className="bg-[var(--team-color)] hover:bg-[var(--team-color)] ">
+                    {headerGroup.headers.map((header) => (
+                      <TableHead 
+                        key={header.id} 
+                        className="h-10 px-3 text-white text-sm font-medium"
+                        style={{ width: header.column.columnDef.size }}
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableHeader>
+              
+              <TableBody>
+                {loading && !table.getRowModel().rows.length ? (
+                  <TableShimmer />
+                ) : table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => {
+                    const hasUpgrade = row.original.isUpdatedPlan != null;
+                    return (
+                      <TableRow
+                        key={row.id}
+                        data-state={row.getIsSelected() && "selected"}
+                        className={`h-2 hover:bg-gray-50 ${
+                          hasUpgrade ? 'bg-blue-50 hover:bg-blue-100' : ''
+                        }`}
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell key={cell.id} className="px-3 py-1">
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    );
+                  })
                 ) : (
-                  <div className="text-center py-4">
-                    <Clock className="h-8 w-8 mx-auto mb-2 text-indigo-200" />
-                    <p className="text-indigo-100 mb-4">No active subscription</p>
-                    <Button 
-                      onClick={handleUpgrade}
-                      className="w-full bg-white text-indigo-600 hover:bg-indigo-50"
-                    >
-                      Choose a Plan
-                    </Button>
-                  </div>
+                  <TableRow className="h-12">
+                    <TableCell colSpan={columns.length} className="h-24 text-center text-sm">
+                      No payment history found.
+                    </TableCell>
+                  </TableRow>
                 )}
-              </CardContent>
-            </Card>
+              </TableBody>
+            </Table>
+          </div>
 
-           
+          {/* Pagination */}
+          <div className="flex flex-col sm:flex-row items-center justify-between space-y-2 sm:space-y-0 space-x-0 sm:space-x-2 py-3 px-4">
+            <div className="flex-1 text-sm text-gray-600">
+              Total Payments : &nbsp;
+              {table.getFilteredRowModel().rows.length}
+            </div>
+            <div className="space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+              >
+                Next
+              </Button>
+            </div>
           </div>
         </div>
       </div>
