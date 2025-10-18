@@ -28,8 +28,8 @@ export const adminNav = [
 ]
 
 export const employeeNav = [
-  { title: "E-Dashboard", url: "/employee", icon: "layout-dashboard" },
-  { title: "E-Calendar", url: "/employee/calender", icon: "calendar" },
-  { title: "E-Requests", url: "/employee/new-request", icon: "file-plus" },
-  { title: "E-Requests List", url: "/employee/all-request", icon: "list" },
+  { title: "Dashboard", url: "/employee", icon: "layout-dashboard" },
+  { title: "Calendar", url: "/employee/calender", icon: "calendar" },
+  { title: "New Requests", url: "/employee/new-request", icon: "file-plus" },
+  { title: "Requests List", url: "/employee/all-request", icon: "list" },
 ]

@@ -1,4 +1,3 @@
-
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -19,6 +18,7 @@ const page = async () => {
     },
     select: {
       companyId: true,
+      availableDays: true,
     },
   });
 
@@ -30,10 +30,15 @@ const page = async () => {
     where: {
       employeeId: session.user.id,
     },
+    orderBy: {
+      createdAt: 'desc',
+    },
+    take: 5,
   });
-if (!user.companyId) {
-  redirect("/onboarding");
-}
+
+  if (!user.companyId) {
+    redirect("/onboarding");
+  }
 
   const companyHolidays = await prisma.companyHoliday.findMany({
     where: {
@@ -45,6 +50,7 @@ if (!user.companyId) {
     <TimeOffRequestForm
       existingRequests={requests}
       companyHolidays={companyHolidays}
+      availableDays={user.availableDays}
     />
   );
 };

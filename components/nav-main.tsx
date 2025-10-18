@@ -23,6 +23,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
+import { useSession } from "next-auth/react";
 
 const itemVariants = {
   open: { opacity: 1, height: "auto", transition: { duration: 0.3 } },
@@ -43,6 +44,7 @@ function toPascalCase(str: string) {
 
 export function NavMain({ items }: { items: any[] }) {
   const pathname = usePathname();
+    const { data: session } = useSession();
 
   // Save sidebar scroll position before navigating
   const handleLinkClick = () => {
@@ -171,6 +173,7 @@ export function NavMain({ items }: { items: any[] }) {
       </SidebarMenu>
     </SidebarGroup>
 
+{session?.user?.role === "ADMIN" && (
 <div className="mt-auto p-3">
   <motion.div
     initial={{ opacity: 0, y: 10 }}
@@ -207,6 +210,7 @@ export function NavMain({ items }: { items: any[] }) {
     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 -translate-x-full animate-shine" />
   </motion.div>
 </div>
+)}
 </>
   );
 }
