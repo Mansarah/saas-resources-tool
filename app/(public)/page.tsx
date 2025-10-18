@@ -5,7 +5,6 @@ import CustomerStories from "@/components/landing/home/customer-stories/customer
 import Faq from "@/components/landing/home/faq/faq";
 import HeroSection from "@/components/landing/home/hero/hero-section";
 import Solutions from "@/components/landing/home/solution/solution";
-import Subscription from "@/components/landing/subscription/subscription";
 import { authOptions } from "@/lib/auth";
 import { Metadata } from "next";
 import { getServerSession } from "next-auth";
@@ -35,7 +34,7 @@ export default async function Home() {
       <HeroSection />
         <Brand />
           {/* <CustomerStories /> */}
-            {/* <Subscription /> */}
+       
                  {/* <Faq /> */}
                   <Solutions />
    </main>

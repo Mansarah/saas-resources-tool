@@ -50,6 +50,13 @@ export async function POST(request: NextRequest) {
       const customer = await stripe.customers.create({
         email: user.email,
         name: user.name || `${user.firstName} ${user.lastName}` || user.email,
+        address: {
+          line1: '',      
+          city: '',
+          state: '',
+          postal_code: '',
+          country: 'IN',
+        },
         metadata: {
           userId: user.id,
         },
@@ -68,12 +75,15 @@ export async function POST(request: NextRequest) {
         },
       ],
       mode: 'payment',
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/admin/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/admin/upgrade`,
       metadata: {
         userId: user.id,
         planId,
         days: days.toString(),
+      },
+       shipping_address_collection: {
+        allowed_countries: ['IN'], // Collect Indian addresses
       },
     });
 

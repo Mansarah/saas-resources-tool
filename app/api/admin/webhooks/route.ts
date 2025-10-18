@@ -62,7 +62,7 @@ async function handleCheckoutSessionCompleted(session: any) {
     return;
   }
 
-  // Calculate expiration date
+  // Calculate expiration date from today
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + parseInt(days));
 
@@ -81,44 +81,127 @@ async function handleCheckoutSessionCompleted(session: any) {
   }
 
   try {
-    // Create or update subscription
-    await prisma.subscription.upsert({
-      where: { userId },
-      update: {
-        stripeCustomerId: session.customer as string,
-        stripeSubscriptionId: session.subscription as string,
-        stripePriceId: session.metadata.planId,
-        planType: planType,
-        stripeCurrentPeriodEnd: new Date(expiresAt),
-        status: 'ACTIVE',
+    // Check if user has ANY subscription (active or inactive)
+    const existingSubscription = await prisma.subscription.findFirst({
+      where: { 
+        userId: userId
       },
-      create: {
-        userId,
-        stripeCustomerId: session.customer as string,
-        stripeSubscriptionId: session.subscription as string,
-        stripePriceId: session.metadata.planId,
-        planType: planType,
-        stripeCurrentPeriodEnd: new Date(expiresAt),
-        status: 'ACTIVE',
-      },
+      orderBy: { createdAt: 'desc' } // Get the most recent one
     });
 
-    console.log(`Subscription created for user ${userId} with ${days} days`);
+    if (existingSubscription && existingSubscription.status === 'ACTIVE') {
+      // Case 1: User has ACTIVE subscription - EXTEND it
+      let newEndDate: Date;
+      
+      if (existingSubscription.stripeCurrentPeriodEnd) {
+        // If there's an existing end date, extend from there
+        const currentEndDate = new Date(existingSubscription.stripeCurrentPeriodEnd);
+        newEndDate = new Date(currentEndDate);
+        newEndDate.setDate(newEndDate.getDate() + parseInt(days));
+      } else {
+        // If no existing end date, start from today
+        newEndDate = new Date(expiresAt);
+      }
+
+      // Check if this is a plan upgrade/downgrade
+      const isPlanChanged = existingSubscription.planType !== planType;
+      const previousPlanEndDate = existingSubscription.stripeCurrentPeriodEnd;
+      
+      let isUpdatedPlanValue: string | null = null;
+      
+      if (isPlanChanged) {
+        // Create upgrade message with previous plan and date info
+        const previousPlanName = formatPlanNameForUpdate(existingSubscription.planType);
+        const newPlanName = formatPlanNameForUpdate(planType);
+        const previousDate = previousPlanEndDate 
+          ? new Date(previousPlanEndDate).toLocaleDateString() 
+          : 'N/A';
+        
+        isUpdatedPlanValue = `Upgraded from ${previousPlanName} (ending ${previousDate}) to ${newPlanName}`;
+      }
+
+      await prisma.subscription.update({
+        where: { id: existingSubscription.id },
+        data: {
+          stripeCustomerId: session.customer as string,
+          stripeSubscriptionId: session.subscription as string,
+          stripePriceId: session.metadata.planId,
+          stripeCurrentPeriodEnd: newEndDate,
+          planType: planType, // Upgrade to new plan type
+          status: 'ACTIVE',
+          isUpdatedPlan: isUpdatedPlanValue, // Set upgrade info only when plan changes
+        },
+      });
+
+      console.log(`Extended ACTIVE subscription for user ${userId} by ${days} days`);
+      if (isPlanChanged) {
+        console.log(`Plan upgraded from ${existingSubscription.planType} to ${planType}`);
+      }
+
+    } else if (existingSubscription) {
+      // Case 2: User has EXPIRED/INACTIVE subscription - REACTIVATE it with new dates
+      await prisma.subscription.update({
+        where: { id: existingSubscription.id },
+        data: {
+          stripeCustomerId: session.customer as string,
+          stripeSubscriptionId: session.subscription as string,
+          stripePriceId: session.metadata.planId,
+          planType: planType,
+          stripeCurrentPeriodEnd: new Date(expiresAt), // Start fresh from today
+          status: 'ACTIVE',
+          isUpdatedPlan: null, // No upgrade info for reactivations
+        },
+      });
+
+      console.log(`Reactivated EXPIRED subscription for user ${userId} with ${days} days`);
+
+    } else {
+      // Case 3: User has NO subscription - CREATE new one
+      await prisma.subscription.create({
+        data: {
+          userId,
+          stripeCustomerId: session.customer as string,
+          stripeSubscriptionId: session.subscription as string,
+          stripePriceId: session.metadata.planId,
+          planType: planType,
+          stripeCurrentPeriodEnd: new Date(expiresAt),
+          status: 'ACTIVE',
+          isUpdatedPlan: null, // No upgrade info for new subscriptions
+        },
+      });
+
+      console.log(`New subscription created for user ${userId} with ${days} days`);
+    }
   } catch (error) {
     console.error('Error updating database:', error);
   }
 }
 
+// Helper function to format plan names for the update message
+function formatPlanNameForUpdate(planType: string): string {
+  const planNames: { [key: string]: string } = {
+    'SEVEN_DAYS': '7 Days Plan',
+    'FOURTEEN_DAYS': '14 Days Plan', 
+    'ONE_MONTH': '1 Month Plan'
+  };
+  return planNames[planType] || planType;
+}
 async function handleSubscriptionUpdated(subscription: any) {
   try {
-    await prisma.subscription.updateMany({
-      where: { stripeSubscriptionId: subscription.id },
-      data: {
-        stripeCurrentPeriodEnd: new Date(subscription.current_period_end * 1000),
-        stripeCancelAtPeriodEnd: subscription.cancel_at_period_end,
-        status: subscription.status === 'active' ? 'ACTIVE' : 'INACTIVE',
-      },
+    const existingSubscription = await prisma.subscription.findFirst({
+      where: { stripeSubscriptionId: subscription.id }
     });
+
+    if (existingSubscription) {
+      await prisma.subscription.update({
+        where: { id: existingSubscription.id },
+        data: {
+          stripeCurrentPeriodEnd: new Date(subscription.current_period_end * 1000),
+          stripeCancelAtPeriodEnd: subscription.cancel_at_period_end,
+          status: subscription.status === 'active' ? 'ACTIVE' : 'INACTIVE',
+        },
+      });
+    }
   } catch (error) {
     console.error('Error updating subscription:', error);
   }
@@ -126,12 +209,18 @@ async function handleSubscriptionUpdated(subscription: any) {
 
 async function handleSubscriptionDeleted(subscription: any) {
   try {
-    await prisma.subscription.updateMany({
-      where: { stripeSubscriptionId: subscription.id },
-      data: {
-        status: 'CANCELED',
-      },
+    const existingSubscription = await prisma.subscription.findFirst({
+      where: { stripeSubscriptionId: subscription.id }
     });
+
+    if (existingSubscription) {
+      await prisma.subscription.update({
+        where: { id: existingSubscription.id },
+        data: {
+          status: 'CANCELED',
+        },
+      });
+    }
   } catch (error) {
     console.error('Error deleting subscription:', error);
   }
