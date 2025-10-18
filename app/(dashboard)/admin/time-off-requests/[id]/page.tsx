@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { calculateDays, formatDate } from "@/lib/utils";
-import { ArrowLeft } from "lucide-react";
+import { ArrowBigLeft, ArrowLeft } from "lucide-react";
 import { getServerSession } from "next-auth";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -29,16 +29,16 @@ const Page = async ({ params }: { params: { id: string } }) => {
   const daysCount = calculateDays(request.startDate, request.endDate);
 
   return (
-    <div className="space-y-2 bg-gray-50 min-h-screen">
+   <div className="max-w-full bg-white p-2 rounded-md space-y-4">
     
 
     
       <div className="flex items-center  gap-2">
     <Link
           href="/admin/time-off-requests"
-          className="text-xs text-gray-600 hover:text-primary flex items-center gap-1"
+          className="text-sm   hover:text-primary flex items-center gap-1 text-[var(--team-color)] "
         >
-         <ArrowLeft className="w-4 h-4 "/> 
+         <ArrowBigLeft className="w-8 h-4 "/> 
         </Link>
           <h1 className="text-xl font-bold text-gray-900">Time Off Request Details</h1>
         

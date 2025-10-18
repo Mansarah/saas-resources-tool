@@ -70,6 +70,7 @@ export function NavMain({ items }: { items: any[] }) {
   }
 
   return (
+    <>
     <SidebarGroup>
       <SidebarGroupLabel>Home</SidebarGroupLabel>
 
@@ -169,5 +170,43 @@ export function NavMain({ items }: { items: any[] }) {
         })}
       </SidebarMenu>
     </SidebarGroup>
+
+<div className="mt-auto p-3">
+  <motion.div
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.3 }}
+    className="relative overflow-hidden rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 p-4 shadow-lg"
+  >
+    {/* Sparkle icon */}
+    <Icons.Zap className="absolute top-2 right-2 h-3 w-3 text-yellow-300" />
+    
+    {/* Content */}
+    <div className="relative z-10">
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="font-semibold text-white text-sm">
+          Upgrade to Pro
+        </h3>
+        <Icons.Crown className="h-3 w-3 text-yellow-300" />
+      </div>
+      
+      <p className="text-white/80 text-xs mb-3 leading-tight">
+        Unlock premium features
+      </p>
+      
+      <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+        <Link href="/admin/upgrade" onClick={handleLinkClick}>
+          <button className="w-full bg-white text-indigo-600 font-medium text-xs py-1.5 px-3 rounded-md hover:bg-gray-50 transition-all duration-200 shadow-sm">
+            Upgrade
+          </button>
+        </Link>
+      </motion.div>
+    </div>
+
+    {/* Subtle shine effect */}
+    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 -translate-x-full animate-shine" />
+  </motion.div>
+</div>
+</>
   );
 }

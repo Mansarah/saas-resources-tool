@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, Building2, Globe, Image } from "lucide-react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -23,7 +23,7 @@ import axios from "axios";
 const companyProfileSchema = z.object({
   name: z.string().min(1, "Company name is required").max(100),
   website: z.string().url("Invalid website URL").optional().or(z.literal("")),
-  logo: z.string().optional().or(z.literal("")),
+  logo: z.string().url("Invalid logo URL").optional().or(z.literal("")),
 });
 
 type CompanyProfileFormValues = z.infer<typeof companyProfileSchema>;
@@ -43,7 +43,8 @@ export default function CompanyProfileForm({
   const [error, setError] = useState<string | null>(null);
 
   const queryClient = useQueryClient();
- const updateCompanyProfileMutation = useMutation({
+  
+  const updateCompanyProfileMutation = useMutation({
     mutationFn: async (data: {
       name: string;
       website?: string;
@@ -78,7 +79,6 @@ export default function CompanyProfileForm({
       });
 
       toast.success("Company profile updated successfully");
-
     } catch (error) {
       setError(
         error instanceof Error
@@ -91,78 +91,108 @@ export default function CompanyProfileForm({
   };
 
   return (
-    <>
+    <div className="space-y-6">
       {error && (
-        <Alert variant={"destructive"}>
+        <Alert variant="destructive" className="mb-4">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-      <Card>
-        <CardHeader>
-          <CardTitle>Company Information</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
+      
+      <Card className="border-0 shadow-sm">
+      
+        <CardContent className="p-4">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <div className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <div className="grid grid-cols-1 gap-2">
                 <FormField
                   control={form.control}
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Company name</FormLabel>
+                      <FormLabel className="text-sm font-medium">Company Name</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Enter company name" />
+                        <div className="relative">
+                          <Building2 className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                          <Input 
+                            {...field} 
+                            placeholder="Enter company name" 
+                            className="pl-10"
+                          />
+                        </div>
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
+                
                 <FormField
                   control={form.control}
                   name="website"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Website</FormLabel>
+                      <FormLabel className="text-sm font-medium">Website</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Enter website link" />
+                        <div className="relative">
+                          <Globe className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                          <Input 
+                            {...field} 
+                            placeholder="https://example.com" 
+                            className="pl-10"
+                          />
+                        </div>
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-xs" />
                     </FormItem>
                   )}
                 />
+                
                 <FormField
                   control={form.control}
                   name="logo"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Logo</FormLabel>
+                      <FormLabel className="text-sm font-medium">Logo URL</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Enter logo link" />
+                        <div className="relative">
+                          <Image className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                          <Input 
+                            {...field} 
+                            placeholder="https://example.com/logo.png" 
+                            className="pl-10"
+                          />
+                        </div>
                       </FormControl>
-                      <FormMessage />
-                      <p className="text-xs text-gray-500">
-                        Enter a URL to your company logo.
+                      <FormMessage className="text-xs" />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Enter a publicly accessible URL to your company logo
                       </p>
                     </FormItem>
                   )}
                 />
               </div>
-              <div className="flex justify-end">
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    </>
-                  ) : (
-                    "Save changes"
-                  )}
-                </Button>
-              </div>
+              
+              {form.formState.isDirty && (
+                <div className="flex justify-end pt-4 border-t">
+                  <Button 
+                    type="submit" 
+                    disabled={isSubmitting}
+                    className="min-w-[120px]"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      "Save Changes"
+                    )}
+                  </Button>
+                </div>
+              )}
             </form>
           </Form>
         </CardContent>
       </Card>
-    </>
+    </div>
   );
 }
