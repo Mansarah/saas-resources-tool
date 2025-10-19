@@ -19,6 +19,8 @@ import {
 import moment from "moment";
 import axios from "axios";
 import { toast } from "sonner";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 interface Employee {
   id: string;
@@ -49,7 +51,7 @@ interface TimeOffRequest {
 }
 
 const AdminReportsPage = () => {
- 
+   const { data: session } = useSession();
   const tableRef = useRef<HTMLDivElement>(null);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [formValues, setFormValues] = useState({
@@ -285,12 +287,16 @@ const AdminReportsPage = () => {
     />
   </div>
 
-  {/* Generate Button */}
-  <div className="flex-1 min-w-[100px] flex items-end">
+
+   {/* Generate Button */}
+<div className="flex-1 min-w-[100px] flex items-end ">
+  {session?.user?.subscriptionStatus === "ACTIVE" &&
+  !moment().isAfter(moment(session?.user?.stripeCurrentPeriodEnd)) ? (
+   
     <Button
       type="submit"
       disabled={isLoading}
-      className="h-10 text-xs bg-blue-600 hover:bg-blue-700 text-white w-full"
+      className="h-10 text-xs bg-blue-600 hover:bg-blue-700 text-white w-full  cursor-pointer"
     >
       {isLoading ? (
         <>
@@ -304,7 +310,21 @@ const AdminReportsPage = () => {
         </>
       )}
     </Button>
-  </div>
+  ) : (
+   
+      <Link href="/admin/upgrade" >
+    <Button
+      type="button"
+  
+      className="h-10 text-xs bg-gradient-to-r from-purple-500 to-purple-800 hover:opacity-90 text-white w-full cursor-pointer"
+    >
+      🔒 Unlock Feature
+    </Button>
+    </Link>
+  )}
+</div>
+
+
 </form>
 
                 </div>

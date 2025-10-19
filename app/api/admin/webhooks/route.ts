@@ -86,7 +86,7 @@ async function handleCheckoutSessionCompleted(session: any) {
       where: { 
         userId: userId
       },
-      orderBy: { createdAt: 'desc' } // Get the most recent one
+      orderBy: { createdAt: 'desc' } 
     });
 
     if (existingSubscription && existingSubscription.status === 'ACTIVE') {
@@ -127,9 +127,9 @@ async function handleCheckoutSessionCompleted(session: any) {
           stripeSubscriptionId: session.subscription as string,
           stripePriceId: session.metadata.planId,
           stripeCurrentPeriodEnd: newEndDate,
-          planType: planType, // Upgrade to new plan type
+          planType: planType, 
           status: 'ACTIVE',
-          isUpdatedPlan: isUpdatedPlanValue, // Set upgrade info only when plan changes
+          isUpdatedPlan: isUpdatedPlanValue, 
         },
       });
 
@@ -147,9 +147,9 @@ async function handleCheckoutSessionCompleted(session: any) {
           stripeSubscriptionId: session.subscription as string,
           stripePriceId: session.metadata.planId,
           planType: planType,
-          stripeCurrentPeriodEnd: new Date(expiresAt), // Start fresh from today
+          stripeCurrentPeriodEnd: new Date(expiresAt), 
           status: 'ACTIVE',
-          isUpdatedPlan: null, // No upgrade info for reactivations
+          isUpdatedPlan: null, 
         },
       });
 
@@ -166,7 +166,7 @@ async function handleCheckoutSessionCompleted(session: any) {
           planType: planType,
           stripeCurrentPeriodEnd: new Date(expiresAt),
           status: 'ACTIVE',
-          isUpdatedPlan: null, // No upgrade info for new subscriptions
+          isUpdatedPlan: null,
         },
       });
 
@@ -177,7 +177,7 @@ async function handleCheckoutSessionCompleted(session: any) {
   }
 }
 
-// Helper function to format plan names for the update message
+
 function formatPlanNameForUpdate(planType: string): string {
   const planNames: { [key: string]: string } = {
     'SEVEN_DAYS': '7 Days Plan',

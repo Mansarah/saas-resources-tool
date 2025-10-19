@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -46,9 +47,10 @@ import {
 
 interface InvitationCodesProps {
   initialCodes: Code[];
+  session:any
 }
 
-const InvitationCodes = ({ initialCodes }: InvitationCodesProps) => {
+const InvitationCodes = ({ initialCodes,session }: InvitationCodesProps) => {
   const [codes, setCodes] = useState<Code[]>(initialCodes);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -267,6 +269,7 @@ const InvitationCodes = ({ initialCodes }: InvitationCodesProps) => {
                   ))}
               </DropdownMenuContent>
             </DropdownMenu>
+            
             <Button 
               onClick={handleGenerateCode} 
               disabled={isGenerating}

@@ -40,7 +40,7 @@ if (!user.companyId) {
   })
 
   return (
-    <InvitationCodes initialCodes={codes} />
+    <InvitationCodes session={session}  initialCodes={codes} />
   )
 }
 
