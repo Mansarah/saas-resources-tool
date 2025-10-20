@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 import Image from 'next/image'
-import { Link as ViewTransitionsLink } from "next-view-transitions";
+
 import React, { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import StarRating from '@/components/shared/star-rating'
+import Link from 'next/link'
 
 
 function HeroSection() {
@@ -64,7 +65,7 @@ function HeroSection() {
             >
               <div className='flex flex-col items-center justify-center gap-8 w-full sm:flex-row'>
                 {/* ----------- Get started Link -------------- */}
-                <ViewTransitionsLink
+                <Link
                   href={`/auth/signin`}
                   className='group bg-purple_blue text-white font-medium flex flex-row justify-between items-center py-2 px-5 rounded-full max-w-64 w-full md:py-3 border border-purple_blue transition-all duration-200 ease-in-out hover:bg-transparent hover:text-purple_blue'
                 >
@@ -100,7 +101,7 @@ function HeroSection() {
                       strokeLinejoin='round'
                     />
                   </svg>
-                </ViewTransitionsLink>
+                </Link>
 
                 {/* --------------- avatar division -------------- */}
                 <div className='flex items-center gap-7'>
