@@ -19,7 +19,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import Link from "next/link";
+import { Link as ViewTransitionsLink } from "next-view-transitions";
 import { usePathname } from "next/navigation";
 import React from "react";
 import { useSession } from "next-auth/react";
@@ -80,7 +80,7 @@ export function NavMain({ items }: { items: any[] }) {
           if (!hasSubItems) {
             return (
               <SidebarMenuItem key={item.title}>
-                <Link href={item.url} onClick={handleLinkClick} prefetch={true} className="w-full">
+                <ViewTransitionsLink href={item.url} onClick={handleLinkClick} className="w-full">
                   <motion.div variants={buttonVariants} whileHover="hover">
                     <SidebarMenuButton
                       tooltip={item.title}
@@ -94,7 +94,7 @@ export function NavMain({ items }: { items: any[] }) {
                       <span>{item.title}</span>
                     </SidebarMenuButton>
                   </motion.div>
-                </Link>
+                </ViewTransitionsLink>
               </SidebarMenuItem>
             );
           }
@@ -139,10 +139,10 @@ export function NavMain({ items }: { items: any[] }) {
                         return (
                           <SidebarMenuSubItem key={subItem.title}>
                             <SidebarMenuSubButton asChild>
-                              <Link
+                              <ViewTransitionsLink
                                 href={subItem.url}
                                 onClick={handleLinkClick}
-                                prefetch={true}
+                              
                                 className="w-full"
                               >
                                 <motion.div
@@ -155,7 +155,7 @@ export function NavMain({ items }: { items: any[] }) {
                                 >
                                   {subItem.title}
                                 </motion.div>
-                              </Link>
+                              </ViewTransitionsLink>
                             </SidebarMenuSubButton>
                           </SidebarMenuSubItem>
                         );
@@ -190,11 +190,11 @@ export function NavMain({ items }: { items: any[] }) {
                   Unlock premium features
                 </p>
                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                  <Link href="/admin/upgrade" onClick={handleLinkClick} prefetch={true}>
+                  <ViewTransitionsLink href="/admin/upgrade" onClick={handleLinkClick} >
                     <button className="w-full bg-white text-indigo-600 font-medium text-xs py-1.5 px-3 rounded-md hover:bg-gray-50 transition-all duration-200 shadow-sm">
                       Upgrade
                     </button>
-                  </Link>
+                  </ViewTransitionsLink>
                 </motion.div>
               </div>
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 -translate-x-full animate-shine" />
