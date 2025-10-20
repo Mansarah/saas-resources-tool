@@ -12,7 +12,8 @@ export const useChatRooms = () => {
       if (!response.ok) throw new Error('Failed to fetch chat rooms')
       return response.json()
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+    staleTime: 2 * 60 * 1000, // 2 minutes
   })
 }
 
@@ -34,7 +35,8 @@ export const useRoomMessages = (roomId: string | null) => {
       return response.json()
     },
     enabled: !!roomId,
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: false,
+    staleTime: 1 * 60 * 1000, // 1 minute
   })
 
   // Update messages when new message arrives via Pusher
@@ -43,6 +45,7 @@ export const useRoomMessages = (roomId: string | null) => {
       queryClient.setQueryData(['room-messages', roomId], (old: any) => {
         if (!old?.messages) return old
         
+        // Check if message already exists to prevent duplicates
         const messageExists = old.messages.some((msg: any) => msg.id === newMessage.id)
         if (!messageExists) {
           return {
@@ -75,6 +78,20 @@ export const useSendMessage = () => {
       return response.json()
     },
     onSuccess: (data, variables) => {
+      // Optimistically update the messages
+      queryClient.setQueryData(['room-messages', variables.roomId], (old: any) => {
+        if (!old?.messages) return old
+        
+        const messageExists = old.messages.some((msg: any) => msg.id === data.id)
+        if (!messageExists) {
+          return {
+            ...old,
+            messages: [...old.messages, data]
+          }
+        }
+        return old
+      })
+      
       // Invalidate and refetch rooms to update last message
       queryClient.invalidateQueries({ queryKey: ['chat-rooms'] })
     },

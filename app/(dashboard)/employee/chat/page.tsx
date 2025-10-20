@@ -116,7 +116,7 @@ export default function EmployeeChatPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-200px)] border rounded-lg">
+    <div className="flex h-[calc(100vh-8rem)]    rounded-lg">
       <ChatSidebar
         rooms={rooms || []}
         selectedRoom={selectedRoom}

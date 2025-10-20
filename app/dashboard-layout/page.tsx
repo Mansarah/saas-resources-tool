@@ -161,7 +161,7 @@ export default function Page({
 
         {/* Main content area - adjusted for mobile bottom nav */}
         <main className="flex flex-1 flex-col gap-4  pt-0  ">
-          <div className="min-h-[calc(100vh-8rem)]  md:min-h-[100vh] flex-1 rounded-xl p-2">
+          <div className="min-h-[calc(100vh-8rem)]  flex-1 rounded-xl p-2">
             {children}
           </div>
         </main>

@@ -142,7 +142,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-200px)] border rounded-lg">
+    <div className="flex h-[calc(100vh-8rem)]     border rounded-lg">
       <ChatSidebar
         rooms={rooms || []}
         selectedRoom={selectedRoom}
