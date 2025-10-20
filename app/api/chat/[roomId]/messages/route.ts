@@ -5,9 +5,11 @@ import { pusherServer } from '@/lib/pusher'
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { roomId: string } }
+  context: { params: Promise<{ roomId: string }> } // ✅ new type
 ) {
   try {
+    const { roomId } = await context.params // ✅ await params
+
     const session = await getServerSession()
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -18,9 +20,7 @@ export async function GET(
     const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100)
 
     const messages = await prisma.chatMessage.findMany({
-      where: {
-        roomId: params.roomId
-      },
+      where: { roomId },
       include: {
         sender: {
           select: {
@@ -50,9 +50,11 @@ export async function GET(
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { roomId: string } }
+  context: { params: Promise<{ roomId: string }> } // ✅ new type
 ) {
   try {
+    const { roomId } = await context.params // ✅ await params
+
     const session = await getServerSession()
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -73,7 +75,7 @@ export async function POST(
       where: {
         userId_roomId: {
           userId: user.id,
-          roomId: params.roomId
+          roomId
         }
       }
     })
@@ -84,7 +86,7 @@ export async function POST(
 
     const message = await prisma.chatMessage.create({
       data: {
-        roomId: params.roomId,
+        roomId,
         senderId: user.id,
         content,
         messageType: 'TEXT'
@@ -104,12 +106,12 @@ export async function POST(
 
     // Update room's updatedAt
     await prisma.chatRoom.update({
-      where: { id: params.roomId },
+      where: { id: roomId },
       data: { updatedAt: new Date() }
     })
 
     // Trigger Pusher event to all participants
-    await pusherServer.trigger(`chat-${params.roomId}`, 'new-message', message)
+    await pusherServer.trigger(`chat-${roomId}`, 'new-message', message)
 
     return NextResponse.json(message)
   } catch (error) {

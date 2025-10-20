@@ -20,7 +20,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import Link from "next/link";
+import { Link as ViewTransitionsLink } from "next-view-transitions";
 import { usePathname } from "next/navigation";
 import React from "react";
 import { useSession } from "next-auth/react";
@@ -93,7 +93,7 @@ export function NavMain({ items }: { items: any[] }) {
           if (!hasSubItems) {
             return (
              <SidebarMenuItem key={item.title}>
-                <Link href={item.url} onClick={handleLinkClick}>
+                <ViewTransitionsLink href={item.url} onClick={handleLinkClick}>
                   <motion.div variants={buttonVariants} whileHover="hover">
                     <SidebarMenuButton
                       tooltip={item.title}
@@ -107,7 +107,7 @@ export function NavMain({ items }: { items: any[] }) {
                       <span>{item.title}</span>
                     </SidebarMenuButton>
                   </motion.div>
-                </Link>
+                </ViewTransitionsLink>
               </SidebarMenuItem>
             );
           }
@@ -137,7 +137,7 @@ export function NavMain({ items }: { items: any[] }) {
                   </motion.div>
                 </CollapsibleTrigger>
 
-                <CollapsibleContent
+                {/* <CollapsibleContent
                   as={motion.div}
                   variants={itemVariants}
                   initial="closed"
@@ -149,7 +149,7 @@ export function NavMain({ items }: { items: any[] }) {
                       return (
                         <SidebarMenuSubItem key={subItem.title}>
                           <SidebarMenuSubButton asChild>
-                            <Link href={subItem.url} onClick={handleLinkClick}>
+                            <ViewTransitionsLink href={subItem.url} onClick={handleLinkClick}>
                               <motion.div
                                 whileHover={{ scale: 1.05 }}
                                 className={`px-3 py-2 rounded-md transition-colors duration-200 ${
@@ -160,13 +160,48 @@ export function NavMain({ items }: { items: any[] }) {
                               >
                                 {subItem.title}
                               </motion.div>
-                            </Link>
+                            </ViewTransitionsLink>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       );
                     })}
                   </SidebarMenuSub>
-                </CollapsibleContent>
+                </CollapsibleContent> */}
+                <CollapsibleContent>
+  <motion.div
+    variants={itemVariants}
+    initial="closed"
+    animate={isParentActive ? "open" : "closed"}
+  >
+    <SidebarMenuSub className="border-l border-blue-500">
+      {item.items?.map((subItem: any) => {
+        const isSubItemActive = pathname === subItem.url;
+        return (
+          <SidebarMenuSubItem key={subItem.title}>
+            <SidebarMenuSubButton asChild>
+              <ViewTransitionsLink
+                href={subItem.url}
+                onClick={handleLinkClick}
+              >
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  className={`px-3 py-2 rounded-md transition-colors duration-200 ${
+                    isSubItemActive
+                      ? "bg-[var(--color-light)] text-[var(--color)] w-full rounded-xl dark:bg-[var(--color-dark)] dark:text-[var(--color-dark-text)]"
+                      : ""
+                  }`}
+                >
+                  {subItem.title}
+                </motion.div>
+              </ViewTransitionsLink>
+            </SidebarMenuSubButton>
+          </SidebarMenuSubItem>
+        );
+      })}
+    </SidebarMenuSub>
+  </motion.div>
+</CollapsibleContent>
+
               </SidebarMenuItem>
             </Collapsible>
           );
@@ -201,11 +236,11 @@ export function NavMain({ items }: { items: any[] }) {
       </p>
       
       <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-        <Link href="/admin/upgrade" onClick={handleLinkClick}>
+        <ViewTransitionsLink href="/admin/upgrade" onClick={handleLinkClick}>
           <button className="w-full bg-white text-indigo-600 font-medium text-xs py-1.5 px-3 rounded-md hover:bg-gray-50 transition-all duration-200 shadow-sm">
             Upgrade
           </button>
-        </Link>
+        </ViewTransitionsLink>
       </motion.div>
     </div>
 

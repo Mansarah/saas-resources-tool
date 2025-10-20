@@ -30,14 +30,19 @@ export function AppSidebar({
   user,
 }: {
   navMain: any[];
-  user: {
-    name: string;
-    role: string;
-    image: string | null;
-    companyName: string | null;
+   user?: {
+    name?: string;
+    role?: string;
+    image?: string | null;
+    companyName?: string | null;
   };
 }) {
-  
+    const safeUser = {
+    name: user?.name ?? "LeaveFlow",
+    role: user?.role ?? "USER",
+    image: user?.image ?? null,
+    companyName: user?.companyName ?? "",
+  };
   // const initialData = {
    
   //   navMain: [
@@ -236,16 +241,16 @@ export function AppSidebar({
   return (
     <Sidebar collapsible="icon" >
       <SidebarHeader>
-           <TeamSwitcher companyName={user.companyName} />
+           <TeamSwitcher companyName={safeUser.companyName} />
       </SidebarHeader>
       <SidebarContent className="sidebar-content">
         {/* <NavProjects projects={data.projects} /> */}
         {/* <NavMain items={initialData.navMain} /> */}
-          <NavMain items={navMain} />
+          <NavMain items={navMain ?? []} />
         {/* <NavMainUser projects={initialData.userManagement} /> */}
       </SidebarContent>
       <SidebarFooter>
-       <NavUser user={user} />
+       <NavUser user={safeUser} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
