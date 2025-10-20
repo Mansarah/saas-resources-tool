@@ -20,11 +20,12 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import { Link as ViewTransitionsLink } from "next-view-transitions";
+
 import { usePathname } from "next/navigation";
 import React from "react";
 import { useSession } from "next-auth/react";
 import moment from "moment";
+import Link from "next/link";
 
 const itemVariants = {
   open: { opacity: 1, height: "auto", transition: { duration: 0.3 } },
@@ -93,7 +94,7 @@ export function NavMain({ items }: { items: any[] }) {
           if (!hasSubItems) {
             return (
              <SidebarMenuItem key={item.title}>
-                <ViewTransitionsLink href={item.url} onClick={handleLinkClick}>
+                <Link href={item.url} onClick={handleLinkClick}>
                   <motion.div variants={buttonVariants} whileHover="hover">
                     <SidebarMenuButton
                       tooltip={item.title}
@@ -107,7 +108,7 @@ export function NavMain({ items }: { items: any[] }) {
                       <span>{item.title}</span>
                     </SidebarMenuButton>
                   </motion.div>
-                </ViewTransitionsLink>
+                </Link>
               </SidebarMenuItem>
             );
           }
@@ -149,7 +150,7 @@ export function NavMain({ items }: { items: any[] }) {
                       return (
                         <SidebarMenuSubItem key={subItem.title}>
                           <SidebarMenuSubButton asChild>
-                            <ViewTransitionsLink href={subItem.url} onClick={handleLinkClick}>
+                            <Link href={subItem.url} onClick={handleLinkClick}>
                               <motion.div
                                 whileHover={{ scale: 1.05 }}
                                 className={`px-3 py-2 rounded-md transition-colors duration-200 ${
@@ -160,7 +161,7 @@ export function NavMain({ items }: { items: any[] }) {
                               >
                                 {subItem.title}
                               </motion.div>
-                            </ViewTransitionsLink>
+                            </Link>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       );
@@ -179,7 +180,7 @@ export function NavMain({ items }: { items: any[] }) {
         return (
           <SidebarMenuSubItem key={subItem.title}>
             <SidebarMenuSubButton asChild>
-              <ViewTransitionsLink
+              <Link
                 href={subItem.url}
                 onClick={handleLinkClick}
               >
@@ -193,7 +194,7 @@ export function NavMain({ items }: { items: any[] }) {
                 >
                   {subItem.title}
                 </motion.div>
-              </ViewTransitionsLink>
+              </Link>
             </SidebarMenuSubButton>
           </SidebarMenuSubItem>
         );
@@ -236,11 +237,11 @@ export function NavMain({ items }: { items: any[] }) {
       </p>
       
       <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-        <ViewTransitionsLink href="/admin/upgrade" onClick={handleLinkClick}>
+        <Link href="/admin/upgrade" onClick={handleLinkClick}>
           <button className="w-full bg-white text-indigo-600 font-medium text-xs py-1.5 px-3 rounded-md hover:bg-gray-50 transition-all duration-200 shadow-sm">
             Upgrade
           </button>
-        </ViewTransitionsLink>
+        </Link>
       </motion.div>
     </div>
 
