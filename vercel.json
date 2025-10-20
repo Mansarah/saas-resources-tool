@@ -5,9 +5,6 @@
       "use": "@vercel/next"
     }
   ],
-  "github": {
-    "silent": true
-  },
-  "hooks": {},
-  "ignoreCommand": "test \"$VERCEL_GIT_COMMIT_REF\" != \"main\" && exit 0 || exit 1"
+  "installCommand": "npm install --legacy-peer-deps",
+  "ignoreCommand": "if [ \"$VERCEL_GIT_COMMIT_REF\" != \"main\" ]; then echo 'Not main branch, skipping build'; exit 0; fi"
 }
