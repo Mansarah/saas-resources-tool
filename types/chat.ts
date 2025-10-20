@@ -6,21 +6,34 @@ export interface User {
   role: string
   firstName?: string
   lastName?: string
+  department?: string
+}
+
+export interface ChatMessage {
+  id: string
+  content: string
+  sender: User
+  messageType: 'TEXT' | 'FILE' | 'SYSTEM'
+  isEdited: boolean
+  createdAt: string
+  updatedAt: string
+  roomId: string
+}
+
+export interface ChatParticipant {
+  user: User
+  joinedAt: string
+  lastReadAt?: string
 }
 
 export interface ChatRoom {
   id: string
   name: string
   isGroup: boolean
-  participants: {
-    user: User
-  }[]
-  messages: Array<{
-    content: string
-    sender: {
-      name: string | null
-    }
-  }>
+  companyId: string
+  participants: ChatParticipant[]
+  messages: ChatMessage[]
+  createdAt: string
   updatedAt: string
 }
 
