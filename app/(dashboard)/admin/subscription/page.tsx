@@ -44,6 +44,7 @@ import {
   ColumnFiltersState,
   VisibilityState,
 } from "@tanstack/react-table";
+import moment from 'moment';
 
 interface Subscription {
   id: string;
@@ -363,10 +364,15 @@ export default function SubscriptionDashboard() {
               <h1 className="text-xl font-bold text-gray-900">Subscription Management</h1>
               <p className="text-xs text-gray-600">Manage your plans and view payment history</p>
             </div>
-            <Button onClick={handleUpgrade} size="sm" className="w-full sm:w-auto">
+            {session?.user?.subscriptionStatus === "ACTIVE" &&
+              !moment().isAfter(moment(session?.user?.stripeCurrentPeriodEnd)) &&(
+
+ <Button onClick={handleUpgrade} size="sm" className="w-full sm:w-auto">
               <Plus className="h-4 w-4 mr-2" />
               Upgrade Plan
             </Button>
+              )}
+           
           </div>
         </div>
 

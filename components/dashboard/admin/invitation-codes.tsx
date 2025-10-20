@@ -28,6 +28,7 @@ import {
   ArrowUpDown,
   ChevronDown,
   Search,
+  Crown,
 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
@@ -44,6 +45,8 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import moment from "moment";
+import Link from "next/link";
 
 interface InvitationCodesProps {
   initialCodes: Code[];
@@ -270,7 +273,7 @@ const InvitationCodes = ({ initialCodes,session }: InvitationCodesProps) => {
               </DropdownMenuContent>
             </DropdownMenu>
             
-            <Button 
+            {/* <Button 
               onClick={handleGenerateCode} 
               disabled={isGenerating}
               size="sm"
@@ -287,7 +290,63 @@ const InvitationCodes = ({ initialCodes,session }: InvitationCodesProps) => {
                   Generate Code
                 </>
               )}
-            </Button>
+            </Button> */}
+            {/* Replace the Generate Code button with this conditional rendering */}
+{codes.length < 5 ? (
+  <Button 
+    onClick={handleGenerateCode} 
+    disabled={isGenerating}
+    size="sm"
+    className="h-9"
+  >
+    {isGenerating ? (
+      <>
+        <RefreshCwIcon className="mr-2 h-3 w-3 animate-spin" />
+        Generating...
+      </>
+    ) : (
+      <>
+        <PlusIcon className="mr-2 h-3 w-3" />
+        Generate Code
+      </>
+    )}
+  </Button>
+) : (
+  session?.user?.stripeCurrentPeriodEnd && 
+  moment(session.user.stripeCurrentPeriodEnd).isAfter(moment()) && 
+  session?.user?.subscriptionStatus === "ACTIVE" ? (
+    <Button 
+      onClick={handleGenerateCode} 
+      disabled={isGenerating}
+      size="sm"
+      className="h-9"
+    >
+      {isGenerating ? (
+        <>
+          <RefreshCwIcon className="mr-2 h-3 w-3 animate-spin" />
+          Generating...
+        </>
+      ) : (
+        <>
+          <PlusIcon className="mr-2 h-3 w-3" />
+          Generate Code
+        </>
+      )}
+    </Button>
+  ) : (
+    <Link href="/admin/upgrade" >
+    <Button 
+     
+      size="sm"
+      className="h-9 bg-amber-500 hover:bg-amber-600 hover:cursor-pointer"
+      title="You've reached the free version limit. Upgrade to generate more codes."
+    >
+      <Crown className="mr-2 h-3 w-3 hover:animate-spin" />
+      Upgrade
+    </Button>
+    </Link>
+  )
+)}
           </div>
         </div>
 

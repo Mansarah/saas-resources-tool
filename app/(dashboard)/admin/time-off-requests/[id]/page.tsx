@@ -145,7 +145,7 @@ const Page = async ({ params }: { params: { id: string } }) => {
       {/* Approve/Reject Buttons (if pending) */}
       {request.status === "PENDING" && (
         <div className="flex justify-end mt-4">
-          <ApproveRejectButtons id={id} employeeEmail={request.employee.email} />
+          <ApproveRejectButtons session={session} id={id} employeeEmail={request.employee.email} />
         </div>
       )}
     </div>

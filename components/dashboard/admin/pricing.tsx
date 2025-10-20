@@ -14,6 +14,7 @@ import {
   Crown,
   Zap,
 } from 'lucide-react';
+import moment from 'moment';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
@@ -133,9 +134,9 @@ export default function Pricing() {
         className={cn(
           'transition-all duration-300 ease-out cursor-pointer',
           'hover:scale-105 hover:shadow-2xl   hover:z-10',
-          'border-2 border-transparent hover:border-indigo-200/50',
+          'border-2 border-transparent hover:border-purple-200/50',
           plan.popular 
-            ? 'ring-2 ring-indigo-600 shadow-lg hover:ring-indigo-400 hover:shadow-xl' 
+            ? 'ring-2 ring-purple-600 shadow-lg hover:ring-purple-400 hover:shadow-xl' 
             : 'shadow-md hover:shadow-xl'
         )}
         onMouseEnter={() => setIsHovered(true)}
@@ -147,7 +148,7 @@ export default function Pricing() {
               <IconComponent 
                 className={cn(
                   "h-5 w-5 transition-all duration-300",
-                  isHovered && "scale-125 text-indigo-600"
+                  isHovered && "scale-125 text-purple-600"
                 )} 
                 aria-hidden="true" 
               />
@@ -161,7 +162,7 @@ export default function Pricing() {
           </PricingCard.Plan>
           
           <PricingCard.Price className="transition-all duration-300 hover:transform hover:scale-105">
-            <PricingCard.MainPrice className="text-2xl transition-all duration-300 hover:text-indigo-600">
+            <PricingCard.MainPrice className="text-2xl transition-all duration-300 hover:text-purple-600">
               {plan.price} Rs
             </PricingCard.MainPrice>
             <PricingCard.Period className="text-sm">/{plan.days} days</PricingCard.Period>
@@ -176,13 +177,13 @@ export default function Pricing() {
               'transform hover:scale-105 hover:shadow-lg',
               'relative overflow-hidden group',
               plan.popular
-                ? 'bg-gradient-to-b from-indigo-500 to-indigo-600 shadow-[0_5px_15px_rgba(99,102,241,0.3)] hover:shadow-[0_8px_25px_rgba(99,102,241,0.4)]'
-                : 'bg-gradient-to-b from-gray-800 to-gray-900 hover:from-gray-700 hover:to-gray-800'
+                ? 'bg-gradient-to-b from-purple-800 to-purple-900 shadow-[0_5px_15px_rgba(99,102,241,0.3)] hover:shadow-[0_8px_25px_rgba(99,102,241,0.4)]'
+                : 'bg-gradient-to-b from-blue-800 to-blue-900 hover:from-blue-700 hover:to-blue-800'
             )}
             onClick={handleClick}
             disabled={loading === plan.id}
           >
-            {/* Button shine effect */}
+           
             <div className={cn(
               "absolute inset-0 transform -skew-x-12 transition-all duration-700",
               "bg-gradient-to-r from-transparent via-white/20 to-transparent",
@@ -196,7 +197,12 @@ export default function Pricing() {
               </span>
             ) : (
               <span className="relative z-10 flex items-center justify-center">
-                Get Started
+                   {session?.user?.subscriptionStatus === "ACTIVE" &&
+                              !moment().isAfter(moment(session?.user?.stripeCurrentPeriodEnd)) ?(
+<p> Upgrade</p>
+
+                              ):(<p> Get Started   </p>)}
+               
                 <svg 
                   className="ml-2 h-3 w-3 transition-transform duration-300 group-hover:translate-x-1" 
                   fill="none" 
@@ -257,15 +263,33 @@ export default function Pricing() {
   };
 
   return (
-    <main className={cn(' w-full py-4 px-4')}>
+    <main className={cn(' w-full py-4 px-4 relative bg-gradient-to-br from-transparent via-transparent to-purple-300/25')}>
+      <div className="absolute inset-0 overflow-hidden">
+           <div 
+             className="absolute inset-0 opacity-10"
+             style={{
+               backgroundImage: 'linear-gradient(to right, #888 1px, transparent 1px), linear-gradient(to bottom, #888 1px, transparent 1px)',
+               backgroundSize: '50px 50px',
+             }}
+           ></div>
+           <div 
+             className="absolute inset-0 opacity-20"
+             style={{
+               backgroundImage: 'radial-gradient(circle at 70% 30%, #7c3aed 1px, transparent 1.5px), radial-gradient(circle at 30% 70%, #db2777 1px, transparent 1.5px)',
+               backgroundSize: '60px 60px',
+               animation: 'moveBackground 20s infinite alternate',
+             }}
+           ></div>
+           </div>
       <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-foreground sm:text-4xl transition-all duration-300 hover:scale-105">
+        <div className="text-center mb-4">
+          <h1 className="text-2xl font-bold text-transparent  bg-gradient-to-r from-purple-900  to-purple-900 sm:text-3xl bg-clip-text transition-all duration-300 hover:scale-105">
             Choose Your Plan
           </h1>
-          <p className="mt-3 max-w-md mx-auto text-muted-foreground transition-all duration-300 hover:text-foreground">
+          <p className=" max-w-md mx-auto text-muted-foreground text-sm transition-all duration-300 hover:text-foreground">
             Select the perfect plan for your needs
           </p>
+          
         </div>
 
         <div className="grid gap-6 md:grid-cols-3">
