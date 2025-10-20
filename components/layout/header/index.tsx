@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
-import Link from 'next/link'
+import { Link as ViewTransitionsLink } from "next-view-transitions";
 import { useEffect, useState } from 'react'
 
 import { Icon } from '@iconify/react/dist/iconify.js'
@@ -57,11 +57,11 @@ const Header = () => {
              
               
                 <div className='flex items-center gap-2'>
-                  <Link
+                  <ViewTransitionsLink
                     href={'/auth/signin'}
                     className='hidden lg:block  border border-dark_black dark:border-white/50  px-2.5 xl:px-4 py-2 rounded-xl bg-dark_black text-white hover:shadow-2xl hover:shadow-purple-900'>
                    Dashboard
-                  </Link>
+                  </ViewTransitionsLink>
                  
                 </div>
               {/* // )}  */}
@@ -157,16 +157,16 @@ const Header = () => {
                   </>
                 {/* ) : ( */}
                   <>
-                    <Link
+                    <ViewTransitionsLink
                       href={'/signin'}
                       className='w-full border border-dark_black dark:border-white text-primary px-4 py-2 rounded-md hover:bg-dark_black dark:hover:bg-white hover:text-white dark:hover:text-dark_black'>
                       Sign In
-                    </Link>
-                    <Link
+                    </ViewTransitionsLink>
+                    <ViewTransitionsLink
                       href={'/signup'}
                       className='w-full text-white dark:text-dark_black px-4 py-2 bg-dark_black dark:bg-white rounded-md hover:opacity-90'>
                       Sign Up
-                    </Link>
+                    </ViewTransitionsLink>
                   </>
                 {/* )} */}
               </div>

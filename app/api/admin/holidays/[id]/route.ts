@@ -5,9 +5,10 @@ import { prisma } from "@/lib/prisma";
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> } // ✅ updated type
 ) {
   try {
+    const { id } = await context.params; // ✅ await params
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
@@ -15,13 +16,8 @@ export async function PUT(
     }
 
     const user = await prisma.user.findUnique({
-      where: {
-        id: session.user.id,
-      },
-      select: {
-        companyId: true,
-        role: true,
-      },
+      where: { id: session.user.id },
+      select: { companyId: true, role: true },
     });
 
     if (!user) {
@@ -33,7 +29,7 @@ export async function PUT(
     }
 
     const holiday = await prisma.companyHoliday.findUnique({
-      where: { id: params.id },
+      where: { id },
       select: { companyId: true },
     });
 
@@ -48,7 +44,7 @@ export async function PUT(
     const { name, date, isRecurring } = await request.json();
 
     const updatedHoliday = await prisma.companyHoliday.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         name,
         date: new Date(date),
@@ -68,9 +64,10 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> } // ✅ updated type
 ) {
   try {
+    const { id } = await context.params; // ✅ await params
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
@@ -78,13 +75,8 @@ export async function DELETE(
     }
 
     const user = await prisma.user.findUnique({
-      where: {
-        id: session.user.id,
-      },
-      select: {
-        companyId: true,
-        role: true,
-      },
+      where: { id: session.user.id },
+      select: { companyId: true, role: true },
     });
 
     if (!user) {
@@ -96,12 +88,8 @@ export async function DELETE(
     }
 
     const existingHoliday = await prisma.companyHoliday.findUnique({
-      where: {
-        id: params.id,
-      },
-      select: {
-        companyId: true,
-      },
+      where: { id },
+      select: { companyId: true },
     });
 
     if (!existingHoliday) {
@@ -112,11 +100,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    await prisma.companyHoliday.delete({
-      where: {
-        id: params.id,
-      },
-    });
+    await prisma.companyHoliday.delete({ where: { id } });
 
     return NextResponse.json({ success: true });
   } catch (error) {

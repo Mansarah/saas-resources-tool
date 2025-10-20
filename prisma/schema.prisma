@@ -66,6 +66,7 @@ model Company {
     holidays CompanyHoliday[]
     users User[]
     codes Code[]
+    chatRooms   ChatRoom[]
 }
 
 model Code {
@@ -100,6 +101,10 @@ model User {
     accounts Account[]
     sessions Session[]
     subscription Subscription[]
+     chatParticipants      ChatParticipant[]
+  sentMessages          ChatMessage[]
+
+   
 }
 
 enum UserRole {
@@ -141,6 +146,7 @@ model Subscription {
   updatedAt DateTime @updatedAt
 }
 
+
 enum TimeOffType {
     VACATION
     SICK
@@ -164,4 +170,49 @@ enum SubscriptionStatus {
   CANCELED
   INACTIVE
   PAST_DUE
+}
+
+
+// Chat models
+model ChatRoom {
+  id String @id @default(uuid())
+  name String
+  companyId String
+  company Company @relation(fields: [companyId], references: [id])
+  isGroup Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  participants ChatParticipant[]
+  messages ChatMessage[]
+}
+
+model ChatParticipant {
+  id String @id @default(uuid())
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  roomId String
+  room ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  joinedAt DateTime @default(now())
+  lastReadAt DateTime?
+  
+  @@unique([userId, roomId])
+}
+
+model ChatMessage {
+  id String @id @default(uuid())
+  roomId String
+  room ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  senderId String
+  sender User @relation(fields: [senderId], references: [id])
+  content String
+  messageType MessageType @default(TEXT)
+  isEdited Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum MessageType {
+  TEXT
+  FILE
+  SYSTEM
 }

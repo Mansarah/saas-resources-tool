@@ -26,6 +26,7 @@ export const adminNav = [
   // { title: "Upgrade", url: "/admin/upgrade", icon: "bar-chart-3" },
   // { title: "Integration", url: "/admin/integration", icon: "puzzle" },
   { title: "Subscription", url: "/admin/subscription", icon: "puzzle" },
+  { title: "Chat", url: "/admin/chat", icon: "puzzle" },
 ]
 
 export const employeeNav = [
@@ -33,4 +34,5 @@ export const employeeNav = [
   { title: "Calendar", url: "/employee/calender", icon: "calendar" },
   { title: "New Requests", url: "/employee/new-request", icon: "file-plus" },
   { title: "Requests List", url: "/employee/all-request", icon: "list" },
+  { title: "Chat", url: "/employee/chat", icon: "list" },
 ]
