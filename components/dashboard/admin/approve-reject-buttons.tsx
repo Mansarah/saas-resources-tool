@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 
-const ApproveRejectButtons = ({ id, employeeEmail }: { id: string; employeeEmail: string }) => {
+const ApproveRejectButtons = ({session, id, employeeEmail }: { id: string; session:any; employeeEmail: string }) => {
 
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -102,7 +103,7 @@ const ApproveRejectButtons = ({ id, employeeEmail }: { id: string; employeeEmail
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="notes">Notes</Label>
+              <Label htmlFor="notes">Notes </Label>
               <Textarea
                 id="notes"
                 value={notes}

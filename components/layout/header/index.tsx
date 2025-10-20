@@ -6,11 +6,9 @@ import { useEffect, useState } from 'react'
 import { Icon } from '@iconify/react/dist/iconify.js'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import HeaderLink from './Navigation/header-link'
 import { headerData } from './Navigation/menu-data'
 import Logo from './Logo'
 import MobileHeader from './Navigation/mobile-header'
-import ThemeToggler from './ThemeToggle'
 
 const Header = () => {
 
@@ -61,7 +59,7 @@ const Header = () => {
                 <div className='flex items-center gap-2'>
                   <Link
                     href={'/auth/signin'}
-                    className='hidden lg:block bg-transparent border border-dark_black dark:border-white/50 text-primary px-2.5 xl:px-4 py-2 rounded-xl hover:bg-dark_black hover:text-white'>
+                    className='hidden lg:block  border border-dark_black dark:border-white/50  px-2.5 xl:px-4 py-2 rounded-xl bg-dark_black text-white hover:shadow-2xl hover:shadow-purple-900'>
                    Dashboard
                   </Link>
                  

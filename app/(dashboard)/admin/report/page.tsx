@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Printer, FileDown, Search, ChevronDown } from "lucide-react";
+import { Loader2, Printer, FileDown, Search, ChevronDown, Crown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -296,7 +296,7 @@ const AdminReportsPage = () => {
     <Button
       type="submit"
       disabled={isLoading}
-      className="h-10 text-xs bg-blue-600 hover:bg-blue-700 text-white w-full  cursor-pointer"
+      className="h-10 text-xs bg-purple-600 hover:bg-purple-700 text-white w-full  cursor-pointer"
     >
       {isLoading ? (
         <>
@@ -313,12 +313,14 @@ const AdminReportsPage = () => {
   ) : (
    
       <Link href="/admin/upgrade" >
-    <Button
-      type="button"
-  
-      className="h-10 text-xs bg-gradient-to-r from-purple-500 to-purple-800 hover:opacity-90 text-white w-full cursor-pointer"
+   <Button 
+     
+      size="sm"
+      className="h-9 bg-amber-500 hover:bg-amber-600 hover:cursor-pointer"
+      title="You've reached the free version limit. Upgrade to generate more codes."
     >
-      🔒 Unlock Feature
+      <Crown className="mr-2 h-3 w-3 hover:animate-spin" />
+      Upgrade
     </Button>
     </Link>
   )}

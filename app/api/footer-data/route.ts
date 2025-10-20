@@ -6,51 +6,43 @@ const footerData = {
         tagline:    "Effortless leave tracking with seamless approvals.",
         socialLinks: [
             {
-                icon: "/images/home/footerSocialIcon/twitter.svg",
-                dark_icon: "/images/home/footerSocialIcon/twitter_dark.svg",
-                link: "https://twitter.com"
+                icon: "/images/home/footerSocialIcon/git.png",
+                dark_icon: "/images/home/footerSocialIcon/git_dark.png",
+                link: "https://github.com/sajid-tech"
             },
             {
                 icon: "/images/home/footerSocialIcon/linkedin.svg",
                 dark_icon: "/images/home/footerSocialIcon/linkedin_dark.svg",
-                link: "https://linkedin.com/in"
+                link: "https://www.linkedin.com/in/sajid-h-8300a11ab/"
             },
-            {
-                icon: "/images/home/footerSocialIcon/dribble.svg",
-                dark_icon: "/images/home/footerSocialIcon/dribble_dark.svg",
-                link: "https://dribbble.com"
-            },
-            {
-                icon: "/images/home/footerSocialIcon/instagram.svg",
-                dark_icon: "/images/home/footerSocialIcon/instagram_dark.svg",
-                link: "https://instagram.com"
-            }
+            // {
+            //     icon: "/images/home/footerSocialIcon/dribble.svg",
+            //     dark_icon: "/images/home/footerSocialIcon/dribble_dark.svg",
+            //     link: "https://dribbble.com"
+            // },
+            // {
+            //     icon: "/images/home/footerSocialIcon/instagram.svg",
+            //     dark_icon: "/images/home/footerSocialIcon/instagram_dark.svg",
+            //     link: "https://instagram.com"
+            // }
         ]
     },
     sitemap: {
         name: "Sitemap",
         links: [
-            { name: "Contact us", url: "/contact" },
-            { name: "About us", url: "/#aboutus" },
+            { name: "Contact us", url: "https://github.com/sajid-tech" },
+            { name: "About us", url: "https://github.com/sajid-tech" },
 
-            { name: "Feature", url: "/#features" },
-            { name: "Pricing", url: "/#pricing" }
+          
+           
         ]
     },
-    otherPages: {
-        name: "Other Pages",
-        links: [
-            { name: "Error 404", url: "/not-found" },
-            { name: "Terms & Conditions", url: "/terms-and-conditions" },
-            { name: "Privacy Policy", url: "/privacy-policy" },
-         
-        ]
-    },
+   
     contactDetails: {
     name: "Contact Details",
-    address: "123 Startup Lane, Bengaluru, India",
-    email: "support@leaveflow.com",
-    phone: "+91 888 888 8888"
+    address: "Bengaluru, India",
+    email: "sajidhussain189057@gmail.com",
+    phone: "+91 9279010410"
   },
   copyright: `©${new Date().getFullYear()} LeaveFlow. All Rights Reserved`
 };

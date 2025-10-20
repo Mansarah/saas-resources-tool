@@ -8,6 +8,7 @@ import InvitationCodes from '@/components/dashboard/admin/invitation-codes';
 
 const page = async () => {
   const session = await getServerSession(authOptions);
+  console.log('session',session)
 
   if (!session?.user?.id) {
     redirect("/")
