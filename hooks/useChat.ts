@@ -1,11 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { usePusher } from './usePusher'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
-// Fetch chat rooms
+
 export const useChatRooms = () => {
-  return useQuery({
+  const queryClient = useQueryClient()
+  
+ 
+  const newRoom = usePusher('room-updates', 'room-created')
+  const roomsUpdated = usePusher('room-updates', 'rooms-updated')
+
+  const query = useQuery({
     queryKey: ['chat-rooms'],
     queryFn: async () => {
       const response = await fetch('/api/chat')
@@ -13,15 +19,48 @@ export const useChatRooms = () => {
       return response.json()
     },
     refetchOnWindowFocus: false,
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: 2 * 60 * 1000, 
   })
+
+ 
+  useEffect(() => {
+    if (newRoom) {
+      queryClient.setQueryData(['chat-rooms'], (old: any) => {
+        if (!old) return [newRoom]
+        
+     
+        const roomExists = old.some((room: any) => room.id === newRoom.id)
+        if (roomExists) return old
+        
+        return [newRoom, ...old]
+      })
+    }
+  }, [newRoom, queryClient])
+
+ 
+  useEffect(() => {
+    if (roomsUpdated) {
+      if (roomsUpdated.type === 'room-created') {
+        queryClient.setQueryData(['chat-rooms'], (old: any) => {
+          if (!old) return [roomsUpdated.room]
+          
+          const roomExists = old.some((room: any) => room.id === roomsUpdated.room.id)
+          if (roomExists) return old
+          
+          return [roomsUpdated.room, ...old]
+        })
+      }
+    }
+  }, [roomsUpdated, queryClient])
+
+  return query
 }
 
-// Fetch messages for a room
+
 export const useRoomMessages = (roomId: string | null) => {
   const queryClient = useQueryClient()
   
-  // Use Pusher for real-time updates
+ 
   const channelName = roomId ? `chat-${roomId}` : null
   const newMessage = usePusher(channelName, 'new-message')
   const roomUpdated = usePusher(channelName, 'room-updated')
@@ -37,23 +76,21 @@ export const useRoomMessages = (roomId: string | null) => {
     },
     enabled: !!roomId,
     refetchOnWindowFocus: false,
-    staleTime: 1 * 60 * 1000, // 1 minute
+    staleTime: 1 * 60 * 1000, 
   })
 
-  // Handle new messages from Pusher - IGNORE messages that are already in the list
+ 
   useEffect(() => {
     if (newMessage && roomId) {
       queryClient.setQueryData(['room-messages', roomId], (old: any) => {
         if (!old?.messages) return old
         
-        // Check if message already exists (to prevent duplicates)
         const messageExists = old.messages.some((msg: any) => 
           msg.id === newMessage.id || 
           (msg.id.startsWith('temp-') && msg.content === newMessage.content)
         )
         
         if (messageExists) {
-          // Replace temp message with real message
           const filteredMessages = old.messages.filter((msg: any) => 
             !(msg.id.startsWith('temp-') && msg.content === newMessage.content)
           )
@@ -63,14 +100,13 @@ export const useRoomMessages = (roomId: string | null) => {
           }
         }
         
-        // Add new message if it doesn't exist
         return {
           ...old,
           messages: [...old.messages, newMessage]
         }
       })
 
-      // Update chat rooms list to show last message
+ 
       queryClient.setQueryData(['chat-rooms'], (oldRooms: any) => {
         if (!oldRooms) return oldRooms
         
@@ -88,7 +124,7 @@ export const useRoomMessages = (roomId: string | null) => {
     }
   }, [newMessage, roomId, queryClient])
 
-  // Handle room updates (for last message in sidebar)
+
   useEffect(() => {
     if (roomUpdated && roomId) {
       queryClient.invalidateQueries({ queryKey: ['chat-rooms'] })
@@ -98,7 +134,38 @@ export const useRoomMessages = (roomId: string | null) => {
   return query
 }
 
-// Send message mutation - FIXED: No duplicate messages
+
+export const useAvailableUsers = () => {
+  const [availableUsers, setAvailableUsers] = useState<any[]>([])
+  const { data: rooms } = useChatRooms()
+
+  const getAvailableUsers = (allUsers: any[]) => {
+    if (!rooms || !allUsers.length) return allUsers
+
+    
+    const existingChatUserIds = new Set()
+    rooms.forEach((room: any) => {
+      room.participants.forEach((participant: any) => {
+        existingChatUserIds.add(participant.user.id)
+      })
+    })
+
+    
+    return allUsers.filter((user: any) => !existingChatUserIds.has(user.id))
+  }
+
+  const updateAvailableUsers = (users: any[]) => {
+    setAvailableUsers(getAvailableUsers(users))
+  }
+
+  return {
+    availableUsers,
+    updateAvailableUsers,
+    getAvailableUsers
+  }
+}
+
+
 export const useSendMessage = () => {
   const queryClient = useQueryClient()
 
@@ -115,13 +182,10 @@ export const useSendMessage = () => {
       return response.json()
     },
     onMutate: async (variables) => {
-      // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: ['room-messages', variables.roomId] })
 
-      // Snapshot the previous value
       const previousMessages = queryClient.getQueryData(['room-messages', variables.roomId])
 
-      // Create optimistic message - ALWAYS on right side for current user
       const tempMessage = {
         id: `temp-${Date.now()}`,
         roomId: variables.roomId,
@@ -142,11 +206,9 @@ export const useSendMessage = () => {
         }
       }
 
-      // Optimistically update messages - temp message appears on right
       queryClient.setQueryData(['room-messages', variables.roomId], (old: any) => {
         if (!old?.messages) return { messages: [tempMessage], nextCursor: null }
         
-        // Remove any existing temp messages with same content to prevent duplicates
         const filteredMessages = old.messages.filter((msg: any) => 
           !(msg.id.startsWith('temp-') && msg.content === variables.content)
         )
@@ -156,7 +218,6 @@ export const useSendMessage = () => {
         }
       })
 
-      // Optimistically update chat rooms
       queryClient.setQueryData(['chat-rooms'], (oldRooms: any) => {
         if (!oldRooms) return oldRooms
         
@@ -175,17 +236,11 @@ export const useSendMessage = () => {
       return { previousMessages }
     },
     onError: (err, variables, context) => {
-      // Rollback on error - remove temp message
       if (context?.previousMessages) {
         queryClient.setQueryData(['room-messages', variables.roomId], context.previousMessages)
       }
     },
-    onSuccess: (data, variables) => {
-      // The real message will come via Pusher and replace the temp message
-      // No need to manually update here as Pusher will handle it
-    },
     onSettled: (data, error, variables) => {
-      // Only refetch on error to ensure consistency
       if (error) {
         queryClient.invalidateQueries({ queryKey: ['room-messages', variables.roomId] })
         queryClient.invalidateQueries({ queryKey: ['chat-rooms'] })
@@ -194,7 +249,7 @@ export const useSendMessage = () => {
   })
 }
 
-// Create room mutation
+
 export const useCreateRoom = () => {
   const queryClient = useQueryClient()
 
@@ -218,14 +273,22 @@ export const useCreateRoom = () => {
       if (!response.ok) throw new Error('Failed to create chat room')
       return response.json()
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+     
       queryClient.invalidateQueries({ queryKey: ['chat-rooms'] })
+      
+ 
+      queryClient.setQueryData(['chat-rooms'], (old: any) => {
+        if (!old) return [data]
+        return [data, ...old]
+      })
     },
   })
 }
 
 // Mark messages as read
 export const useMarkAsRead = () => {
+   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (roomId: string) => {
       const response = await fetch(`/api/chat/${roomId}/read`, {
@@ -238,21 +301,107 @@ export const useMarkAsRead = () => {
       return response.json()
     },
     onSuccess: (_, roomId) => {
-      const queryClient = useQueryClient()
       queryClient.invalidateQueries({ queryKey: ['chat-rooms'] })
     },
   })
 }
 
-// Real-time room updates hook
-export const useRoomUpdates = (roomId: string | null) => {
+
+export const useRoomUpdates = () => {
   const queryClient = useQueryClient()
-  const channelName = roomId ? `chat-${roomId}` : null
-  const roomUpdate = usePusher(channelName, 'room-updated')
+  
+ 
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 
   useEffect(() => {
-    if (roomUpdate && roomId) {
-      queryClient.invalidateQueries({ queryKey: ['chat-rooms'] })
+   
+    const fetchCurrentUser = async () => {
+      try {
+        const response = await fetch('/api/auth/current-user')
+        if (response.ok) {
+          const userData = await response.json()
+          setCurrentUserId(userData.id)
+        }
+      } catch (error) {
+        console.error('Failed to fetch current user:', error)
+      }
     }
-  }, [roomUpdate, roomId, queryClient])
+    
+    fetchCurrentUser()
+  }, [])
+
+ 
+  const userChannelName = currentUserId ? `user-${currentUserId}` : null
+  const roomCreated = usePusher(userChannelName, 'room-created')
+  
+  
+  const companyChannelName = currentUserId ? `company-${currentUserId}` : null 
+  const companyRoomCreated = usePusher(companyChannelName, 'room-created')
+
+  useEffect(() => {
+    if (roomCreated) {
+      // console.log('Real-time room created (user channel):', roomCreated)
+      queryClient.setQueryData(['chat-rooms'], (old: any) => {
+        if (!old) return [roomCreated]
+        
+        const roomExists = old.some((room: any) => room.id === roomCreated.id)
+        if (roomExists) return old
+        
+        return [roomCreated, ...old]
+      })
+    }
+  }, [roomCreated, queryClient])
+
+  useEffect(() => {
+    if (companyRoomCreated) {
+      // console.log('Real-time room created (company channel):', companyRoomCreated)
+      queryClient.setQueryData(['chat-rooms'], (old: any) => {
+        if (!old) return [companyRoomCreated]
+        
+        const roomExists = old.some((room: any) => room.id === companyRoomCreated.id)
+        if (roomExists) return old
+        
+        return [companyRoomCreated, ...old]
+      })
+    }
+  }, [companyRoomCreated, queryClient])
+
+
+  const useRoomUpdatesGeneric = () => {
+    const queryClient = useQueryClient()
+    
+    
+    const roomCreatedUser = usePusher('room-updates-user', 'room-created')
+    const roomCreatedCompany = usePusher('room-updates-company', 'room-created')
+
+    useEffect(() => {
+      if (roomCreatedUser) {
+        // console.log('Real-time room created (generic user):', roomCreatedUser)
+        queryClient.setQueryData(['chat-rooms'], (old: any) => {
+          if (!old) return [roomCreatedUser]
+          
+          const roomExists = old.some((room: any) => room.id === roomCreatedUser.id)
+          if (roomExists) return old
+          
+          return [roomCreatedUser, ...old]
+        })
+      }
+    }, [roomCreatedUser, queryClient])
+
+    useEffect(() => {
+      if (roomCreatedCompany) {
+        // console.log('Real-time room created (generic company):', roomCreatedCompany)
+        queryClient.setQueryData(['chat-rooms'], (old: any) => {
+          if (!old) return [roomCreatedCompany]
+          
+          const roomExists = old.some((room: any) => room.id === roomCreatedCompany.id)
+          if (roomExists) return old
+          
+          return [roomCreatedCompany, ...old]
+        })
+      }
+    }, [roomCreatedCompany, queryClient])
+  }
+
+  return useRoomUpdatesGeneric
 }

@@ -49,6 +49,7 @@ export async function GET() {
         lastName: true,
         email: true,
         department: true,
+        image:true
       },
       orderBy: {
         firstName: 'asc',

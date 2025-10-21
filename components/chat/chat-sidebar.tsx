@@ -294,6 +294,7 @@ const getRoomDisplayInfo = (room: ChatRoom) => {
 }
 
 // New Chat Dialog Component
+
 function NewChatDialog({ 
   users, 
   currentUser, 
@@ -312,13 +313,32 @@ function NewChatDialog({
   const [isCreating, setIsCreating] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const filteredUsers = users.filter(
-    (user: User) => 
+  const { data: rooms } = useChatRooms()
+  
+  // Filter out users that already have chats with current user
+  const getFilteredUsers = () => {
+    if (!rooms || !users.length) return users
+
+    // Get all user IDs that we already have chats with
+    const existingChatUserIds = new Set<string>()
+    rooms.forEach((room: any) => {
+      room.participants.forEach((participant: any) => {
+        if (participant.user.id !== currentUser.id) {
+          existingChatUserIds.add(participant.user.id)
+        }
+      })
+    })
+
+    return users.filter((user: User) => 
       user.id !== currentUser.id &&
+      !existingChatUserIds.has(user.id) &&
       !selectedUsers.find((selected: User) => selected.id === user.id) &&
       (getUserDisplayName(user).toLowerCase().includes(searchTerm.toLowerCase()) ||
        user.email.toLowerCase().includes(searchTerm.toLowerCase()))
-  )
+    )
+  }
+
+  const filteredUsers = getFilteredUsers()
 
   const handleCreateRoom = async () => {
     if (selectedUsers.length > 0) {
@@ -347,7 +367,6 @@ function NewChatDialog({
 
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen)
-    // Reset form when dialog closes
     if (!isOpen) {
       setSelectedUsers([])
       setSearchTerm('')
@@ -443,8 +462,12 @@ function NewChatDialog({
             <div className="space-y-1">
               {filteredUsers.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  <p className="text-sm">No users found</p>
-                  <p className="text-xs mt-1">Try a different search term</p>
+                  <p className="text-sm">
+                    {searchTerm ? 'No users found' : 'No available users to chat with'}
+                  </p>
+                  <p className="text-xs mt-1">
+                    {!searchTerm && 'You are already chatting with all available colleagues'}
+                  </p>
                 </div>
               ) : (
                 filteredUsers.map((user: User) => (
@@ -477,7 +500,7 @@ function NewChatDialog({
           </ScrollArea>
 
           {/* Help Text */}
-          {selectedUsers.length === 0 && (
+          {selectedUsers.length === 0 && filteredUsers.length > 0 && (
             <div className="text-center py-4">
               <UserPlus className="h-8 w-8 mx-auto text-muted-foreground/40 mb-2" />
               <p className="text-xs text-muted-foreground">Select users to start a chat</p>
