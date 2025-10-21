@@ -62,7 +62,7 @@ export function NavUser({
               <LogOut
                 onClick={() => setShowSignOutDialog(true)}
               
-                className="ml-auto size-4  hover:text-red-600 hover:scale-125 "  />
+                className="ml-auto size-4  hover:text-red-600 hover:scale-125 hover:cursor-pointer "  />
              
               </SidebarMenuButton>
         
