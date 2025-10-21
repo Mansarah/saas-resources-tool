@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -6,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "sonner";
+import { useSession } from "next-auth/react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,12 +25,14 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 
 import { cn } from "@/lib/utils";
-import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+
 import { Building2, Users, Mail, Briefcase, Globe, Image } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const employeeSchema = z.object({
   firstName: z.string().min(1, "First name is required").max(55),
-  lastName: z.string().min(1, "Last name is required").max(55),
+  lastName: z.string().optional(),
   email: z.string().email("Invalid email address").max(100),
   department: z.string().optional(),
   invitationCode: z
@@ -38,7 +42,7 @@ const employeeSchema = z.object({
 
 const adminSchema = z.object({
   firstName: z.string().min(1, "First name is required").max(55),
-  lastName: z.string().min(1, "Last name is required").max(55),
+  lastName: z.string().optional(),
   email: z.string().email("Invalid email address").max(100),
   companyName: z.string().min(1, "Company name is required").max(100),
   companyWebsite: z
@@ -65,16 +69,30 @@ const OnboardingForm = ({
 }: OnboardingFormProps) => {
   const [accountType, setAccountType] = useState<"admin" | "employee">("employee");
   const [error, setError] = useState<string | null>(null);
-
+  const [isProcessing, setIsProcessing] = useState(false);
+  
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const { update } = useSession();
+
 
   const createEmployeeMutation = useMutation({
     mutationFn: async (data: { department?: string; invitationCode: string }) => {
       const response = await axios.post("/api/onboarding/employee", data);
       return response.data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user"] });
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["user"] }),
+        update() // Force session update
+      ]);
+      
+      toast.success("Profile completed successfully!");
+      router.replace("/employee");
+    },
+    onError: (err: any) => {
+      setError(err?.response?.data?.error || err?.message || "Failed to complete onboarding");
+      setIsProcessing(false);
     },
   });
 
@@ -83,8 +101,18 @@ const OnboardingForm = ({
       const response = await axios.post("/api/onboarding/admin", data);
       return response.data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user"] });
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["user"] }),
+        update() // Force session update
+      ]);
+      
+      toast.success("Company setup completed successfully!");
+      router.replace("/admin");
+    },
+    onError: (err: any) => {
+      setError(err?.response?.data?.error || err?.message || "Failed to complete onboarding");
+      setIsProcessing(false);
     },
   });
 
@@ -111,50 +139,37 @@ const OnboardingForm = ({
     },
   });
 
-  const handleEmployeeSubmit = async (data: EmployeeFormValues) => {
+  const handleEmployeeSubmit = (data: EmployeeFormValues) => {
     setError(null);
-
-    try {
-      await createEmployeeMutation.mutateAsync({
-        department: data.department,
-        invitationCode: data.invitationCode,
-      });
-
-      toast.success("Profile completed successfully!");
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    } catch (error: unknown) {
-      console.error("Error creating employee:", error);
-      setError(
-        error instanceof Error ? error.message : "Failed to complete onboarding"
-      );
-    }
+    setIsProcessing(true);
+    createEmployeeMutation.mutate({
+      department: data.department,
+      invitationCode: data.invitationCode,
+    });
   };
 
-  const handleAdminSubmit = async (data: AdminFormValues) => {
+  const handleAdminSubmit = (data: AdminFormValues) => {
     setError(null);
-
-    try {
-      await createAdminMutation.mutateAsync({
-        companyName: data.companyName,
-        companyWebsite: data.companyWebsite,
-        companyLogo: data.companyLogo,
-      });
-
-      toast.success("Company setup completed successfully!");
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    } catch (error: unknown) {
-      console.error("Error creating admin:", error);
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Failed to complete onboarding. Please try again."
-      );
-    }
+    setIsProcessing(true);
+    createAdminMutation.mutate({
+      companyName: data.companyName,
+      companyWebsite: data.companyWebsite,
+      companyLogo: data.companyLogo,
+    });
   };
+
+
+  if (isProcessing) {
+    return (
+      <div className="p-6 bg-card rounded-lg border border-border text-center space-y-4">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+        <h2 className="text-lg font-bold text-foreground">Completing Setup...</h2>
+        <p className="text-sm text-muted-foreground">
+          Please wait while we set up your account.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -164,7 +179,7 @@ const OnboardingForm = ({
         <RadioGroup
           defaultValue="employee"
           value={accountType}
-          onValueChange={(value) => setAccountType(value as "admin" | "employee")}
+          onValueChange={(value: string) => setAccountType(value as "admin" | "employee")}
           className="grid grid-cols-2 gap-2"
         >
           <div>
@@ -244,7 +259,7 @@ const OnboardingForm = ({
                 />
                 <FormField
                   control={employeeForm.control}
-                  name="lastName"
+                  name="lastName" 
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-xs">Last Name</FormLabel>
@@ -334,7 +349,7 @@ const OnboardingForm = ({
             <Button
               type="submit"
               className="w-full h-8 text-sm"
-              disabled={createEmployeeMutation.isPending}
+              disabled={createEmployeeMutation.isPending || isProcessing}
             >
               {createEmployeeMutation.isPending ? "Joining Team..." : "Join Team"}
             </Button>
@@ -480,7 +495,7 @@ const OnboardingForm = ({
             <Button
               type="submit"
               className="w-full h-8 text-sm"
-              disabled={createAdminMutation.isPending}
+              disabled={createAdminMutation.isPending || isProcessing}
             >
               {createAdminMutation.isPending ? "Creating Company..." : "Create Company"}
             </Button>

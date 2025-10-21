@@ -3,26 +3,39 @@
 import OnboardingForm from "@/components/onboarding-form/onboarding-form";
 import { useSession } from "next-auth/react";
 import { Calendar } from "lucide-react";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
 export default function OnboardingPage() {
-  const { data: session, status } = useSession();
-  
-  // console.log("session", session);
-  // console.log("status", status);
-
-if (session) {
-  if (session.user.onboardingCompleted) {
-    if (session.user.role === "ADMIN") {
-      redirect("/admin");
-    } else if (session.user.role === "EMPLOYEE") {
-      redirect("/employee");
-    } else {
-      redirect("/"); // fallback if needed
-    }
-  }
-}
+  const { data: session, status, update } = useSession();
+  const router = useRouter();
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   
+  useEffect(() => {
+    const redirectUser = async () => {
+      if (isRedirecting) return;
+      
+      if (session?.user?.onboardingCompleted) {
+        setIsRedirecting(true);
+        
+      
+        await update();
+        
+       
+        if (session.user.role === "ADMIN") {
+          router.replace("/admin");
+        } else if (session.user.role === "EMPLOYEE") {
+          router.replace("/employee");
+        } else {
+          router.replace("/");
+        }
+      }
+    };
+
+    redirectUser();
+  }, [session, router, update, isRedirecting]);
+
   if (status === "loading") {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-3">
@@ -49,6 +62,18 @@ if (session) {
           >
             Return to Home
           </button>
+        </div>
+      </div>
+    );
+  }
+
+ 
+  if (session.user.onboardingCompleted) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-3">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+          <p className="text-muted-foreground text-sm">Redirecting to your dashboard...</p>
         </div>
       </div>
     );
