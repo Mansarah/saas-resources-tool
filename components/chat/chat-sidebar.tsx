@@ -279,7 +279,7 @@ const getRoomDisplayInfo = (room: ChatRoom) => {
                 currentUser={currentUser}
                 onCreateRoom={onCreateRoom}
                 trigger={
-                  <Button className="bg-primary hover:bg-primary/90 text-primary-foreground h-8 text-xs rounded-lg">
+                  <Button className="bg-primary hover:bg-primary/90 hover:cursor-pointer text-primary-foreground h-8 text-xs rounded-lg">
                     <Plus className="h-3 w-3 mr-1" />
                     New Chat
                   </Button>
@@ -361,7 +361,7 @@ function NewChatDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         {trigger || (
-          <Button size="icon" className="rounded-lg w-8 h-8 p-0 bg-primary hover:bg-primary/90 text-primary-foreground">
+          <Button size="icon" className="rounded-lg w-8 h-8 p-0 bg-primary hover:cursor-pointer hover:bg-primary/90 text-primary-foreground">
             <Plus className="h-4 w-4" />
           </Button>
         )}

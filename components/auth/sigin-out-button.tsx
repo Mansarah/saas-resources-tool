@@ -34,10 +34,10 @@ export function SignOutDialog({ open, onOpenChange }: SignOutDialogProps) {
           </DialogDescription>
         </DialogHeader>
         <div className="flex justify-end space-x-2 pt-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" className="cursor-pointer" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button variant="default" onClick={handleSignOut}>
+          <Button variant="default" className="cursor-pointer" onClick={handleSignOut}>
             Sign Out
           </Button>
         </div>
