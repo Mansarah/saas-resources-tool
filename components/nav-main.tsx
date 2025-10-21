@@ -94,7 +94,7 @@ export function NavMain({ items }: { items: any[] }) {
           if (!hasSubItems) {
             return (
              <SidebarMenuItem key={item.title}>
-                <Link href={item.url} onClick={handleLinkClick}>
+                <Link href={item.url} prefetch={true} onClick={handleLinkClick}>
                   <motion.div variants={buttonVariants} whileHover="hover">
                     <SidebarMenuButton
                       tooltip={item.title}
@@ -181,6 +181,7 @@ export function NavMain({ items }: { items: any[] }) {
           <SidebarMenuSubItem key={subItem.title}>
             <SidebarMenuSubButton asChild>
               <Link
+              prefetch={true}
                 href={subItem.url}
                 onClick={handleLinkClick}
               >
@@ -237,7 +238,7 @@ export function NavMain({ items }: { items: any[] }) {
       </p>
       
       <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-        <Link href="/admin/upgrade" onClick={handleLinkClick}>
+        <Link href="/admin/upgrade" prefetch={true} onClick={handleLinkClick}>
           <button className="w-full bg-white text-indigo-600 font-medium text-xs py-1.5 px-3 rounded-md hover:bg-gray-50 transition-all duration-200 shadow-sm">
             Upgrade
           </button>

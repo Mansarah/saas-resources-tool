@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { prisma } from '@/lib/prisma'
+import { pusherServer } from '@/lib/pusher'
 
 export async function GET(req: NextRequest) {
   try {
@@ -111,9 +112,45 @@ export async function POST(req: NextRequest) {
               }
             }
           }
+        },
+        messages: {
+          take: 1,
+          orderBy: { createdAt: 'desc' }
         }
       }
     })
+
+    // Prepare room data for real-time update
+    const roomData = {
+      id: room.id,
+      name: room.name,
+      isGroup: room.isGroup,
+      companyId: room.companyId,
+      participants: room.participants,
+      messages: room.messages,
+      createdAt: room.createdAt.toISOString(),
+      updatedAt: room.updatedAt.toISOString()
+    }
+
+    // Trigger real-time updates for all participants
+    try {
+      // Create a list of all participant IDs including the current user
+      const allParticipantIds = [user.id, ...participantIds]
+      
+      // Trigger for all participants on their user-specific channels
+      allParticipantIds.forEach(async (participantId: string) => {
+        await pusherServer.trigger(`user-${participantId}`, 'room-created', roomData)
+      })
+
+      // Also trigger on a general company channel
+      await pusherServer.trigger(`company-${user.companyId}`, 'room-created', roomData)
+
+      console.log('Pusher triggers sent to:', allParticipantIds)
+
+    } catch (pusherError) {
+      console.error('Pusher trigger error:', pusherError)
+      // Don't fail the request if Pusher fails
+    }
 
     return NextResponse.json(room)
   } catch (error) {

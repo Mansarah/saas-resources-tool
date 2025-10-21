@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { ChatSidebar } from '@/components/chat/chat-sidebar'
 import { ChatWindow } from '@/components/chat/chat-window'
 import { Button } from '@/components/ui/button'
-import { useChatRooms, useCreateRoom, useSendMessage } from '@/hooks/useChat'
+import { useChatRooms, useCreateRoom, useSendMessage, useRoomUpdates } from '@/hooks/useChat'
 import { User, ChatRoom } from '@/types/chat'
 
 export default function EmployeeChatPage() {
@@ -14,10 +14,13 @@ export default function EmployeeChatPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Use TanStack Query hooks
+  
   const { data: rooms, isLoading: roomsLoading, error: roomsError } = useChatRooms()
   const createRoomMutation = useCreateRoom()
   const sendMessageMutation = useSendMessage()
+
+ 
+  useRoomUpdates()
 
   useEffect(() => {
     fetchUserData()
@@ -79,7 +82,7 @@ export default function EmployeeChatPage() {
     setSelectedRoom(room)
   }
 
-  // Combine loading states
+ 
   const isDataLoading = isLoading || roomsLoading
   const hasError = error || roomsError
 
@@ -116,7 +119,7 @@ export default function EmployeeChatPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-8rem)]    rounded-lg">
+    <div className="flex h-[calc(100vh-8rem)] rounded-lg">
       <ChatSidebar
         rooms={rooms || []}
         selectedRoom={selectedRoom}
